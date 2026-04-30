@@ -67,3 +67,10 @@ temp/
 
 # --- Vercel ---
 .vercel/
+
+# --- Supabase ---
+supabase/.temp/
+
+# --- Banco de dados ---
+*.db
+*.sqlite

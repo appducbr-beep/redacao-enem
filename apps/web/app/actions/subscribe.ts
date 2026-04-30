@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import {
   findCustomerByEmail,
   createCustomer,
+  updateCustomer,
   createSubscription as createAsaasSubscription,
   getFirstPendingPayment,
 } from '@/lib/asaas'
@@ -19,7 +20,8 @@ const PLAN_CONFIG = {
 }
 
 export async function createProSubscription(
-  plan: 'pro-monthly' | 'pro-annual'
+  plan: 'pro-monthly' | 'pro-annual',
+  cpfCnpj: string
 ): Promise<SubscribeResult> {
   const supabase = await createClient()
   const {
@@ -49,10 +51,12 @@ export async function createProSubscription(
   const email = user.email!
 
   try {
-    // Reuse existing customer or create new one
+    // Reuse existing customer or create new one; ensure cpfCnpj is always set
     let customer = await findCustomerByEmail(email)
     if (!customer) {
-      customer = await createCustomer({ name, email })
+      customer = await createCustomer({ name, email, cpfCnpj })
+    } else if (!customer.cpfCnpj) {
+      customer = await updateCustomer(customer.id, { cpfCnpj })
     }
 
     const { value, cycle, billingCycle, label } = PLAN_CONFIG[plan]

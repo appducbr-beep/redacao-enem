@@ -47,7 +47,7 @@ export default async function Home() {
   }
 
   const [profileResult, walletResult, essaysResult] = await Promise.all([
-    supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+    supabase.from('profiles').select('full_name, plan').eq('id', user.id).single(),
     supabase
       .from('credit_wallets')
       .select('credits_available')
@@ -64,8 +64,10 @@ export default async function Home() {
       .limit(50),
   ])
 
-  const fullName = (profileResult.data as { full_name?: string } | null)?.full_name
-  const greeting = fullName ?? user.email ?? 'aluno'
+  type ProfileRow = { full_name?: string; plan?: string }
+  const fullName = (profileResult.data as ProfileRow | null)?.full_name ?? null
+  const plan = (profileResult.data as ProfileRow | null)?.plan ?? 'free'
+  const isPro = plan === 'pro' || plan === 'school'
 
   const creditsAvailable =
     (walletResult.data as { credits_available?: number } | null)?.credits_available ?? null
@@ -129,9 +131,14 @@ export default async function Home() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-800">
-              Olá, {fullName ? fullName.split(' ')[0] : greeting}!
+              {fullName ? `Olá, ${fullName.split(' ')[0]}!` : 'Olá! Complete seu perfil'}
             </h1>
-            <p className="text-sm text-slate-500 mt-0.5">Bem-vindo ao seu painel de treino</p>
+            <div className="flex items-center gap-3 mt-0.5">
+              <p className="text-sm text-slate-500">Bem-vindo ao seu painel de treino</p>
+              <Link href="/perfil" className="text-xs text-blue-600 hover:underline">
+                Editar perfil
+              </Link>
+            </div>
           </div>
           <LogoutButton />
         </div>
@@ -145,7 +152,7 @@ export default async function Home() {
         </div>
 
         {/* Action cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className={`grid grid-cols-1 gap-4 ${isPro ? 'sm:grid-cols-3' : 'sm:grid-cols-2 md:grid-cols-4'}`}>
           <DashboardActionCard
             icon="✍️"
             title="Nova redação"
@@ -164,6 +171,14 @@ export default async function Home() {
             description="Acompanhe seu progresso ao longo do tempo"
             href="/evolucao"
           />
+          {!isPro && (
+            <DashboardActionCard
+              icon="⭐"
+              title="Planos Pro"
+              description="Redações ilimitadas e temas exclusivos"
+              href="/planos"
+            />
+          )}
         </div>
 
         {/* Stats */}
@@ -172,6 +187,24 @@ export default async function Home() {
           totalEssays={totalEssays}
           creditsAvailable={creditsAvailable}
         />
+
+        {/* Upgrade CTA — only when out of credits on free plan */}
+        {!isPro && creditsAvailable === 0 && (
+          <div className="rounded-xl border border-orange-100 bg-orange-50 px-5 py-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold text-orange-900">Créditos esgotados</p>
+              <p className="text-xs text-orange-700 mt-0.5">
+                Assine o plano Pro para treinar sem limites.
+              </p>
+            </div>
+            <Link
+              href="/planos"
+              className="shrink-0 rounded-lg bg-orange-600 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-700 transition-colors"
+            >
+              Assinar Pro
+            </Link>
+          </div>
+        )}
 
         {/* Recent essays */}
         <RecentEssaysTable essays={recentEssays} />

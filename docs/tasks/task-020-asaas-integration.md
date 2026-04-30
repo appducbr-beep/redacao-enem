@@ -1,7 +1,7 @@
 # Task 020 — Integração com Asaas (Assinatura Pro)
 
 **Status:** concluída  
-**Data:** 2026-04-29  
+**Data:** 2026-04-30 (atualizado — CPF obrigatório)  
 **Responsável:** Claude Code (operador técnico)
 
 ---
@@ -16,25 +16,35 @@ Permitir que o usuário assine o plano Pro via Asaas (mensal ou anual), com conf
 
 ```
 1. Usuário clica "Começar plano Pro" em /planos
-2. PricingSection chama Server Action: createProSubscription(plan)
-3. Action:
+2. PricingSection abre CpfModal solicitando CPF
+3. Usuário informa CPF (validado: 11 dígitos após remover pontuação)
+4. PricingSection chama Server Action: createProSubscription(plan, cpfCnpj)
+5. Action:
    a. Valida auth
    b. Verifica assinatura ativa existente
-   c. Busca ou cria customer no Asaas
+   c. Busca ou cria customer no Asaas (com cpfCnpj)
+      — se customer já existir sem cpfCnpj: atualiza via POST /customers/{id}
    d. Cria subscription no Asaas
    e. Busca primeiro pagamento pendente → invoiceUrl
    f. Salva na tabela subscriptions (status: pending)
    g. Retorna { checkoutUrl: invoiceUrl }
-4. Frontend redireciona para checkoutUrl (página Asaas)
-5. Usuário paga no Asaas
-6. Asaas envia POST para /api/asaas/webhook?token=TOKEN
-7. Webhook:
+6. Frontend redireciona para checkoutUrl (página Asaas)
+7. Usuário paga no Asaas
+8. Asaas envia POST para /api/asaas/webhook?token=TOKEN
+9. Webhook:
    a. Valida token
-   b. Localiza subscription pelo asaas_subscription_id
-   c. Atualiza subscription.status = 'active'
-   d. Atualiza profiles.plan = 'pro'
-   e. Adiciona créditos ao credit_wallets
+   b. Insere em webhook_logs (idempotência por asaas_event_id UNIQUE)
+   c. Localiza subscription pelo asaas_subscription_id
+   d. Insere em asaas_payments (upsert por asaas_payment_id UNIQUE)
+   e. Atualiza subscription.status = 'active'
+   f. Atualiza profiles.plan = 'pro'
+   g. Adiciona créditos ao credit_wallets (30 mensal / 360 anual)
 ```
+
+### CPF — armazenamento
+
+O CPF é coletado no frontend, enviado ao backend via Server Action e repassado ao Asaas.
+**Não é armazenado no banco de dados do Reda1000.** Persiste apenas no Asaas (customer.cpfCnpj).
 
 ---
 
@@ -43,7 +53,8 @@ Permitir que o usuário assine o plano Pro via Asaas (mensal ou anual), com conf
 | Método | Endpoint | Uso |
 |---|---|---|
 | GET | `/customers?email=...` | Buscar customer existente |
-| POST | `/customers` | Criar novo customer |
+| POST | `/customers` | Criar novo customer (com cpfCnpj) |
+| POST | `/customers/{id}` | Atualizar cpfCnpj de customer existente |
 | POST | `/subscriptions` | Criar assinatura |
 | GET | `/subscriptions/{id}/payments?status=PENDING` | Obter link do primeiro pagamento |
 

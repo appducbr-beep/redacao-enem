@@ -29,6 +29,7 @@ export interface AsaasCustomer {
   id: string
   name: string
   email: string
+  cpfCnpj?: string
 }
 
 export interface AsaasSubscription {
@@ -69,9 +70,19 @@ export async function findCustomerByEmail(email: string): Promise<AsaasCustomer 
 export async function createCustomer(data: {
   name: string
   email: string
-  cpfCnpj?: string
+  cpfCnpj: string
 }): Promise<AsaasCustomer> {
   return asaasFetch<AsaasCustomer>('/customers', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export async function updateCustomer(
+  customerId: string,
+  data: { cpfCnpj: string }
+): Promise<AsaasCustomer> {
+  return asaasFetch<AsaasCustomer>(`/customers/${customerId}`, {
     method: 'POST',
     body: JSON.stringify(data),
   })

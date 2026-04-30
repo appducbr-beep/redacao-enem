@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 type AuthState = { error: string | null; success?: string }
 
@@ -27,12 +28,20 @@ export async function signUp(
 ): Promise<AuthState> {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   })
 
   if (error) return { error: error.message }
+
+  const fullName = (formData.get('full_name') as string)?.trim()
+  if (fullName && data.user) {
+    await supabaseAdmin
+      .from('profiles')
+      .update({ full_name: fullName })
+      .eq('id', data.user.id)
+  }
 
   redirect('/')
 }

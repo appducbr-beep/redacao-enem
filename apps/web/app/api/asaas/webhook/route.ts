@@ -23,10 +23,12 @@ interface WebhookPayload {
 }
 
 export async function POST(request: NextRequest) {
-  const token = request.nextUrl.searchParams.get('token')
+  const receivedToken = request.headers.get('asaas-access-token')
   const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN
 
-  if (!expectedToken || token !== expectedToken) {
+  console.log('[webhook/asaas] token received:', Boolean(receivedToken))
+
+  if (!expectedToken || receivedToken !== expectedToken) {
     console.warn('[webhook/asaas] Unauthorized request — invalid token')
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

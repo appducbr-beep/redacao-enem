@@ -110,3 +110,9 @@ export async function getFirstPendingPayment(subscriptionId: string): Promise<As
   )
   return result.data[0] ?? null
 }
+
+export async function cancelSubscription(subscriptionId: string): Promise<void> {
+  await asaasFetch<{ deleted?: boolean }>(`/subscriptions/${subscriptionId}`, {
+    method: 'DELETE',
+  })
+}

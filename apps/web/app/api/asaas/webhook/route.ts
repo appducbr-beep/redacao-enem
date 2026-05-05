@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
-const CREDITS_BY_BILLING_CYCLE: Record<string, number> = {
-  monthly: 30,
-  yearly: 360,
+const PRO_CREDITS_PER_CYCLE = 20
+
+const CREDIT_REASON_BY_BILLING_CYCLE: Record<string, string> = {
+  monthly: 'asaas_payment_confirmed_monthly_reset',
+  yearly:  'asaas_payment_confirmed_annual_monthly_allowance',
 }
 
 interface WebhookPayload {
@@ -138,24 +140,23 @@ async function handlePaymentConfirmed(payment?: WebhookPayload['payment']) {
 
   await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('id', sub.user_id)
 
-  const credits = CREDITS_BY_BILLING_CYCLE[(sub as { billing_cycle: string }).billing_cycle] ?? 30
+  // Non-accumulative: set balance to exactly PRO_CREDITS_PER_CYCLE regardless of current balance
+  const billingCycle = (sub as { billing_cycle: string }).billing_cycle
+  const creditReason = CREDIT_REASON_BY_BILLING_CYCLE[billingCycle] ?? CREDIT_REASON_BY_BILLING_CYCLE.monthly
 
-  const { data: wallet } = await supabaseAdmin
-    .from('credit_wallets')
-    .select('credits_available')
-    .eq('user_id', sub.user_id)
-    .maybeSingle()
+  const { error: rpcError } = await supabaseAdmin.rpc('set_credit_balance', {
+    target_user_id:    sub.user_id,
+    available_credits: PRO_CREDITS_PER_CYCLE,
+    reason:            creditReason,
+  })
 
-  if (wallet) {
-    const current = (wallet as { credits_available: number }).credits_available ?? 0
-    await supabaseAdmin
-      .from('credit_wallets')
-      .update({ credits_available: current + credits })
-      .eq('user_id', sub.user_id)
+  if (rpcError) {
+    console.error('[webhook/asaas] set_credit_balance failed:', rpcError)
+    throw new Error(`set_credit_balance: ${rpcError.message}`)
   }
 
   console.log(
-    `[webhook/asaas] Activated sub ${sub.id} user=${sub.user_id} billing_cycle=${(sub as { billing_cycle: string }).billing_cycle} +${credits} credits`
+    `[webhook/asaas] Activated sub ${sub.id} user=${sub.user_id} billing_cycle=${billingCycle} credits=>${PRO_CREDITS_PER_CYCLE}`
   )
 }
 

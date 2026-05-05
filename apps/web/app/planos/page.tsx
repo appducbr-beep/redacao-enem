@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabaseServer'
 import PricingSection from '@/components/plans/PricingSection'
+import CancelSubscriptionButton from '@/app/perfil/CancelSubscriptionButton'
 
 const DIFFERENTIALS = [
   {
@@ -70,9 +71,15 @@ export default async function PlanosPage() {
             </div>
           )}
           {user && userPlan === 'pro' && (
-            <p className="text-sm font-semibold text-green-700">
-              Você já tem o plano Pro ✓
-            </p>
+            <div className="pt-1 space-y-3">
+              <p className="text-sm font-semibold text-green-700">
+                Você já tem o plano Pro ✓
+              </p>
+              <p className="text-xs text-slate-400">
+                Você pode cancelar seu plano a qualquer momento.
+              </p>
+              <CancelSubscriptionButton />
+            </div>
           )}
         </div>
       </section>

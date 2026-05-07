@@ -46,7 +46,7 @@ export default async function Home() {
     )
   }
 
-  const [profileResult, walletResult, essaysResult] = await Promise.all([
+  const [profileResult, walletResult, essaysResult, subscriptionResult] = await Promise.all([
     supabase.from('profiles').select('full_name, plan').eq('id', user.id).single(),
     supabase
       .from('credit_wallets')
@@ -62,12 +62,23 @@ export default async function Home() {
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(50),
+    supabase
+      .from('subscriptions')
+      .select('cancel_at_period_end, current_period_end')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle(),
   ])
 
   type ProfileRow = { full_name?: string; plan?: string }
   const fullName = (profileResult.data as ProfileRow | null)?.full_name ?? null
   const plan = (profileResult.data as ProfileRow | null)?.plan ?? 'free'
   const isPro = plan === 'pro' || plan === 'school'
+
+  type SubRow = { cancel_at_period_end: boolean; current_period_end: string | null }
+  const subRow = subscriptionResult.data as SubRow | null
+  const cancelAtPeriodEnd = subRow?.cancel_at_period_end ?? false
+  const periodEndIso = subRow?.current_period_end ?? null
 
   const creditsAvailable =
     (walletResult.data as { credits_available?: number } | null)?.credits_available ?? null
@@ -187,6 +198,22 @@ export default async function Home() {
           totalEssays={totalEssays}
           creditsAvailable={creditsAvailable}
         />
+
+        {/* Scheduled cancellation notice */}
+        {isPro && cancelAtPeriodEnd && periodEndIso && (
+          <div className="rounded-xl border border-blue-100 bg-blue-50 px-5 py-4">
+            <p className="text-sm font-semibold text-blue-900">Renovação cancelada</p>
+            <p className="text-xs text-blue-700 mt-0.5">
+              Seu plano Pro continua ativo até{' '}
+              <span className="font-semibold">
+                {new Date(periodEndIso).toLocaleDateString('pt-BR', {
+                  day: '2-digit', month: '2-digit', year: 'numeric',
+                })}
+              </span>
+              . Após essa data, você voltará ao plano Gratuito.
+            </p>
+          </div>
+        )}
 
         {/* Upgrade CTA — only when out of credits on free plan */}
         {!isPro && creditsAvailable === 0 && (

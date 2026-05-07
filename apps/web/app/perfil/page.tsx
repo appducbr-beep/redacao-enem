@@ -11,6 +11,14 @@ const PLAN_LABELS: Record<string, string> = {
   school: 'School',
 }
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
 type Props = { searchParams: Promise<{ cancelled?: string }> }
 
 export default async function PerfilPage({ searchParams }: Props) {
@@ -33,6 +41,22 @@ export default async function PerfilPage({ searchParams }: Props) {
   const fullName = (profile as { full_name?: string; plan?: string } | null)?.full_name ?? ''
   const isPro = plan === 'pro' || plan === 'school'
 
+  // Fetch active subscription details for Pro users
+  type SubRow = { cancel_at_period_end: boolean; current_period_end: string | null }
+  let subData: SubRow | null = null
+  if (isPro) {
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('cancel_at_period_end, current_period_end')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle()
+    subData = data as SubRow | null
+  }
+
+  const cancelAtPeriodEnd = subData?.cancel_at_period_end ?? false
+  const periodEndIso = subData?.current_period_end ?? null
+
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto w-full max-w-md space-y-6">
@@ -49,12 +73,22 @@ export default async function PerfilPage({ searchParams }: Props) {
           <p className="text-sm text-slate-500 mt-0.5">Gerencie suas informações pessoais</p>
         </div>
 
-        {/* Cancelled confirmation banner */}
-        {cancelled && (
-          <div className="rounded-xl border border-green-100 bg-green-50 px-5 py-4">
-            <p className="text-sm font-semibold text-green-800">Plano Pro cancelado</p>
-            <p className="text-xs text-green-700 mt-0.5">
-              Seu plano Pro foi cancelado. Você não receberá novas cobranças.
+        {/* Cancellation confirmation banners */}
+        {cancelled === 'immediate' && (
+          <div className="rounded-xl border border-amber-100 bg-amber-50 px-5 py-4">
+            <p className="text-sm font-semibold text-amber-900">Plano cancelado</p>
+            <p className="text-xs text-amber-800 mt-0.5">
+              Seu plano foi cancelado dentro do prazo de garantia. O reembolso será processado
+              conforme as regras da plataforma de pagamento.
+            </p>
+          </div>
+        )}
+        {cancelled === 'scheduled' && periodEndIso && (
+          <div className="rounded-xl border border-blue-100 bg-blue-50 px-5 py-4">
+            <p className="text-sm font-semibold text-blue-900">Renovação cancelada</p>
+            <p className="text-xs text-blue-800 mt-0.5">
+              Sua renovação foi cancelada. Seu plano Pro continuará ativo até{' '}
+              <span className="font-semibold">{formatDate(periodEndIso)}</span>.
             </p>
           </div>
         )}
@@ -78,7 +112,17 @@ export default async function PerfilPage({ searchParams }: Props) {
             )}
           </div>
 
-          {isPro && (
+          {isPro && cancelAtPeriodEnd && periodEndIso && (
+            <div className="pt-1 border-t border-slate-100">
+              <p className="text-xs text-slate-500">
+                Acesso Pro ativo até{' '}
+                <span className="font-semibold text-slate-700">{formatDate(periodEndIso)}</span>.
+                Após essa data, você voltará ao plano Gratuito.
+              </p>
+            </div>
+          )}
+
+          {isPro && !cancelAtPeriodEnd && (
             <div className="pt-1 border-t border-slate-100 space-y-2">
               <p className="text-xs text-slate-400">
                 Você pode cancelar seu plano a qualquer momento.

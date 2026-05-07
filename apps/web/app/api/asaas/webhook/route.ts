@@ -133,9 +133,28 @@ async function handlePaymentConfirmed(payment?: WebhookPayload['payment']) {
       { onConflict: 'asaas_payment_id' }
     )
 
+  // Compute period dates for this payment cycle
+  const now = new Date()
+  const isYearly = billingCycle === 'yearly'
+  const periodEnd = new Date(now)
+  if (isYearly) {
+    periodEnd.setFullYear(periodEnd.getFullYear() + 1)
+  } else {
+    periodEnd.setMonth(periodEnd.getMonth() + 1)
+  }
+  const nextCreditReset = new Date(now)
+  nextCreditReset.setMonth(nextCreditReset.getMonth() + 1)
+
   await supabaseAdmin
     .from('subscriptions')
-    .update({ status: 'active' })
+    .update({
+      status:               'active',
+      cancel_at_period_end: false,
+      refund_required:      false,
+      current_period_start: now.toISOString(),
+      current_period_end:   periodEnd.toISOString(),
+      next_credit_reset_at: isYearly ? nextCreditReset.toISOString() : null,
+    })
     .eq('id', sub.id)
 
   await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('id', sub.user_id)

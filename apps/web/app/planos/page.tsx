@@ -34,13 +34,24 @@ export default async function PlanosPage() {
   } = await supabase.auth.getUser()
 
   let userPlan: string | null = null
+  let cancelAtPeriodEnd = false
+  let periodEndIso: string | null = null
+
   if (user) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('plan')
-      .eq('id', user.id)
-      .single()
-    userPlan = (data as { plan?: string } | null)?.plan ?? 'free'
+    const [profileData, subData] = await Promise.all([
+      supabase.from('profiles').select('plan').eq('id', user.id).single(),
+      supabase
+        .from('subscriptions')
+        .select('cancel_at_period_end, current_period_end')
+        .eq('user_id', user.id)
+        .eq('status', 'active')
+        .maybeSingle(),
+    ])
+    userPlan = (profileData.data as { plan?: string } | null)?.plan ?? 'free'
+    type SubRow = { cancel_at_period_end: boolean; current_period_end: string | null }
+    const sub = subData.data as SubRow | null
+    cancelAtPeriodEnd = sub?.cancel_at_period_end ?? false
+    periodEndIso = sub?.current_period_end ?? null
   }
 
   return (
@@ -75,10 +86,24 @@ export default async function PlanosPage() {
               <p className="text-sm font-semibold text-green-700">
                 Você já tem o plano Pro ✓
               </p>
-              <p className="text-xs text-slate-400">
-                Você pode cancelar seu plano a qualquer momento.
-              </p>
-              <CancelSubscriptionButton />
+              {cancelAtPeriodEnd && periodEndIso ? (
+                <p className="text-xs text-slate-500">
+                  Renovação cancelada. Acesso ativo até{' '}
+                  <span className="font-semibold">
+                    {new Date(periodEndIso).toLocaleDateString('pt-BR', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                    })}
+                  </span>
+                  .
+                </p>
+              ) : (
+                <>
+                  <p className="text-xs text-slate-400">
+                    Você pode cancelar seu plano a qualquer momento.
+                  </p>
+                  <CancelSubscriptionButton />
+                </>
+              )}
             </div>
           )}
         </div>

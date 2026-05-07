@@ -134,6 +134,7 @@ async function handlePaymentConfirmed(payment?: WebhookPayload['payment']) {
     )
 
   // Compute period dates for this payment cycle
+  const billingCycle = (sub as { billing_cycle: string }).billing_cycle
   const now = new Date()
   const isYearly = billingCycle === 'yearly'
   const periodEnd = new Date(now)
@@ -160,7 +161,6 @@ async function handlePaymentConfirmed(payment?: WebhookPayload['payment']) {
   await supabaseAdmin.from('profiles').update({ plan: 'pro' }).eq('id', sub.user_id)
 
   // Non-accumulative: set balance to exactly PRO_CREDITS_PER_CYCLE regardless of current balance
-  const billingCycle = (sub as { billing_cycle: string }).billing_cycle
   const creditReason = CREDIT_REASON_BY_BILLING_CYCLE[billingCycle] ?? CREDIT_REASON_BY_BILLING_CYCLE.monthly
 
   const { error: rpcError } = await supabaseAdmin.rpc('set_credit_balance', {

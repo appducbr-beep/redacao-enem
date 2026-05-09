@@ -36,34 +36,34 @@ export default async function TemasPage() {
   const proCount = topics.filter((t) => !t.is_free).length
 
   return (
-    <main className="min-h-screen bg-white px-4 py-10">
+    <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="mx-auto w-full max-w-2xl">
 
         <div className="flex items-center justify-between mb-8">
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
             ← Início
           </Link>
           <LogoutButton />
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-3xl font-bold text-slate-900">
             Temas de redação
           </h1>
-          <p className="mt-1 text-base text-gray-500">
+          <p className="mt-1 text-base text-slate-500">
             Escolha um tema para começar seu treino
           </p>
-          <div className="mt-3 flex items-center gap-3 text-xs text-gray-400">
-            <span>{freeCount} gratuito{freeCount !== 1 ? 's' : ''}</span>
-            <span>·</span>
-            <span>{proCount} Pro</span>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 rounded-full bg-green-50 border border-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+              {freeCount} gratuito{freeCount !== 1 ? 's' : ''}
+            </span>
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 border border-blue-100 px-2.5 py-1 text-xs font-medium text-blue-700">
+              {proCount} Pro
+            </span>
             {!isUserPro && proCount > 0 && (
-              <>
-                <span>·</span>
-                <Link href="/planos" className="text-blue-600 hover:underline">
-                  Assinar Pro
-                </Link>
-              </>
+              <Link href="/planos" className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors ml-1">
+                Assinar Pro →
+              </Link>
             )}
           </div>
         </div>
@@ -73,7 +73,10 @@ export default async function TemasPage() {
         )}
 
         {!topicsError && topics.length === 0 && (
-          <p className="text-sm text-gray-400">Nenhum tema disponível no momento.</p>
+          <div className="text-center py-16">
+            <p className="text-2xl mb-3">📝</p>
+            <p className="text-sm text-slate-500">Nenhum tema disponível no momento.</p>
+          </div>
         )}
 
         {topics.length > 0 && (

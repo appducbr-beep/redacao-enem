@@ -56,12 +56,12 @@ export default async function RedacoesPage() {
     <main className="min-h-screen bg-slate-50 px-4 py-10">
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+          <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
             ← Início
           </Link>
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Minhas redações</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Minhas redações</h1>
           <p className="text-sm text-slate-500 mt-1">Últimas 20 redações enviadas</p>
         </div>
         <EssayHistoryList essays={essays} />

@@ -98,17 +98,25 @@ export default async function EvolucaoPage() {
   if (essays.length === 0) {
     return (
       <main className="min-h-screen bg-slate-50 px-4 py-10">
-        <div className="max-w-3xl mx-auto text-center space-y-4 py-20">
-          <h1 className="text-2xl font-bold text-slate-800">Minha evolução</h1>
-          <p className="text-sm text-slate-500">
-            Você ainda não possui redações corrigidas suficientes para acompanhar sua evolução.
-          </p>
-          <Link
-            href="/temas"
-            className="inline-block rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-800 transition-colors"
-          >
-            Começar uma redação
-          </Link>
+        <div className="max-w-3xl mx-auto">
+          <div className="mb-8">
+            <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
+              ← Início
+            </Link>
+          </div>
+          <div className="text-center space-y-4 py-16">
+            <div className="text-4xl">📈</div>
+            <h1 className="text-2xl font-bold text-slate-800">Minha evolução</h1>
+            <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+              Corrija sua primeira redação para começar a acompanhar sua evolução por competência.
+            </p>
+            <Link
+              href="/temas"
+              className="inline-block rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+            >
+              Começar uma redação
+            </Link>
+          </div>
         </div>
       </main>
     )
@@ -170,7 +178,10 @@ export default async function EvolucaoPage() {
 
         {/* Header */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Minha evolução</h1>
+          <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
+            ← Início
+          </Link>
+          <h1 className="text-2xl font-bold text-slate-800 mt-4">Minha evolução</h1>
           <p className="text-sm text-slate-500 mt-1">
             Acompanhe seu progresso nas redações corrigidas
           </p>
@@ -185,7 +196,7 @@ export default async function EvolucaoPage() {
         />
 
         {/* Diagnosis */}
-        <div className={`rounded-xl border-l-4 px-5 py-4 ${diagnosisColor}`}>
+        <div className={`rounded-2xl border-l-4 px-5 py-4 ${diagnosisColor}`}>
           <p className="text-sm font-semibold text-slate-800">{diagnosisTitle}</p>
           <p className="text-sm text-slate-600 mt-0.5">{diagnosisSub}</p>
         </div>

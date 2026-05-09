@@ -58,7 +58,7 @@ export default async function PlanosPage() {
 
       {/* Back link */}
       <div className="px-4 pt-6 max-w-2xl mx-auto">
-        <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+        <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
           ← Início
         </Link>
       </div>
@@ -68,10 +68,10 @@ export default async function PlanosPage() {
         <div className="max-w-2xl mx-auto text-center space-y-4 mt-8 mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
             Alcance a nota 1000{' '}
-            <span className="text-blue-700">com feedback de verdade</span>
+            <span className="text-blue-600">com feedback de verdade</span>
           </h1>
           <p className="text-lg text-slate-500">
-            Receba diagnósticos rápidos e precisos baseados nos critérios do ENEM
+            Diagnósticos rápidos e precisos baseados nos critérios oficiais do ENEM
           </p>
           <p className="text-sm text-slate-400">
             Descubra exatamente onde você perde pontos e como melhorar.
@@ -121,10 +121,10 @@ export default async function PlanosPage() {
       </section>
 
       {/* Differentials */}
-      <section className="bg-white border-t border-slate-100 px-4 py-12">
+      <section className="bg-white border-t border-slate-100 px-4 py-14">
         <div className="max-w-3xl mx-auto space-y-10">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-slate-800">
+            <h2 className="text-2xl font-bold text-slate-900">
               Por que o Reda1000 é diferente?
             </h2>
             <p className="text-sm text-slate-500">
@@ -136,9 +136,11 @@ export default async function PlanosPage() {
             {DIFFERENTIALS.map(({ icon, title, description }) => (
               <div
                 key={title}
-                className="flex gap-4 bg-slate-50 border border-slate-100 rounded-xl p-5"
+                className="flex gap-4 bg-slate-50 border border-slate-100 rounded-2xl p-5 hover:border-slate-200 transition-colors"
               >
-                <span className="text-2xl shrink-0">{icon}</span>
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-xl shrink-0 shadow-sm">
+                  {icon}
+                </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-slate-800">{title}</p>
                   <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
@@ -151,16 +153,16 @@ export default async function PlanosPage() {
 
       {/* CTA final */}
       <section className="px-4 py-12">
-        <div className="max-w-2xl mx-auto rounded-2xl bg-gradient-to-r from-blue-900 to-blue-700 px-8 py-12 text-center space-y-5">
-          <h2 className="text-2xl font-bold text-white">
+        <div className="max-w-2xl mx-auto rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 px-8 py-12 text-center space-y-5 shadow-xl">
+          <h2 className="text-2xl font-bold text-white leading-snug">
             Comece agora e veja sua evolução em poucas redações
           </h2>
-          <p className="text-sm text-blue-200">
+          <p className="text-sm text-blue-300">
             Sem cartão de crédito. Sem compromisso. Comece hoje mesmo.
           </p>
           <Link
             href={user ? '/temas' : '/register'}
-            className="inline-block rounded-xl bg-white text-blue-800 font-semibold text-sm px-7 py-3.5 hover:bg-blue-50 transition-colors"
+            className="inline-block rounded-xl bg-white text-blue-800 font-semibold text-sm px-7 py-3.5 hover:bg-blue-50 transition-colors shadow-sm"
           >
             Começar gratuitamente
           </Link>

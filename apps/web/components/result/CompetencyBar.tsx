@@ -23,14 +23,14 @@ export default function CompetencyBar({ label, score }: Props) {
 
   return (
     <div className="flex items-center gap-3 min-w-0">
-      <span className="text-sm text-gray-600 shrink-0 w-36 truncate">{label}</span>
-      <div className="flex-1 bg-slate-200 rounded-full h-2 overflow-hidden min-w-0">
+      <span className="text-sm text-slate-600 shrink-0 w-40 truncate">{label}</span>
+      <div className="flex-1 bg-slate-100 rounded-full h-2.5 overflow-hidden min-w-0">
         <div
-          className={`h-full rounded-full ${barColor(score)}`}
+          className={`h-full rounded-full transition-all duration-500 ${barColor(score)}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-      <span className={`text-sm font-semibold shrink-0 w-16 text-right ${scoreTextColor(score)}`}>
+      <span className={`text-sm font-bold shrink-0 w-14 text-right tabular-nums ${scoreTextColor(score)}`}>
         {score}/200
       </span>
     </div>

@@ -12,7 +12,7 @@ const STATUS_CLASSES: Record<string, string> = {
   done: 'bg-green-100 text-green-700',
   processing: 'bg-yellow-100 text-yellow-700',
   error: 'bg-red-100 text-red-700',
-  pending: 'bg-slate-100 text-slate-600',
+  pending: 'bg-slate-100 text-slate-500',
 }
 
 function scoreColor(score: number): string {
@@ -33,29 +33,38 @@ export default function EssayListItem({ essay }: { essay: EssayItem }) {
   const statusKey = essay.status in STATUS_LABEL ? essay.status : 'pending'
 
   return (
-    <div className="flex items-center justify-between gap-4 bg-white border border-slate-200 rounded-xl px-5 py-4 shadow-sm hover:shadow transition-shadow">
-      <div className="min-w-0 flex-1 space-y-1">
+    <div className="flex items-center justify-between gap-4 bg-white border border-slate-100 rounded-2xl px-5 py-4 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200">
+      <div className="min-w-0 flex-1 space-y-0.5">
         <p className="text-sm font-semibold text-slate-800 truncate">{essay.topic_title}</p>
         <p className="text-xs text-slate-400">{dateFormatted}</p>
       </div>
 
       <div className="flex items-center gap-3 shrink-0">
-        <span className={`text-xs font-semibold px-2 py-1 rounded-md ${STATUS_CLASSES[statusKey]}`}>
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_CLASSES[statusKey]}`}>
           {STATUS_LABEL[statusKey]}
         </span>
 
         {essay.status === 'done' && essay.total_score !== null && (
-          <span className={`text-sm font-bold w-16 text-right ${scoreColor(essay.total_score)}`}>
-            {essay.total_score}/1000
+          <span className={`text-sm font-bold tabular-nums w-14 text-right ${scoreColor(essay.total_score)}`}>
+            {essay.total_score}
           </span>
         )}
 
         {essay.status === 'done' && (
           <Link
             href={`/redacoes/${essay.id}`}
-            className="text-xs font-medium text-blue-600 hover:text-blue-800 whitespace-nowrap"
+            className="text-xs font-semibold text-blue-600 hover:text-blue-800 whitespace-nowrap transition-colors"
           >
-            Abrir resultado →
+            Ver resultado →
+          </Link>
+        )}
+
+        {essay.status !== 'done' && (
+          <Link
+            href={`/redacoes/${essay.id}`}
+            className="text-xs font-medium text-slate-500 hover:text-slate-700 whitespace-nowrap transition-colors"
+          >
+            Abrir →
           </Link>
         )}
       </div>

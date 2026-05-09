@@ -48,10 +48,10 @@ export default function PlanCard({
   disabled = false,
 }: Props) {
   const cardClass = [
-    'relative flex flex-col h-full rounded-2xl p-7',
+    'relative flex flex-col h-full rounded-2xl p-7 transition-all duration-200',
     highlighted
-      ? 'bg-blue-50 border-2 border-blue-500 shadow-md md:scale-105 z-10'
-      : 'bg-white border border-slate-200 shadow-sm',
+      ? 'bg-gradient-to-b from-blue-50 to-white border-2 border-blue-500 shadow-lg md:scale-105 z-10'
+      : 'bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200',
   ].join(' ')
 
   const ctaBase =
@@ -71,8 +71,8 @@ export default function PlanCard({
     <div className={cardClass}>
       {/* Badge */}
       {badge && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <span className="bg-blue-700 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-sm whitespace-nowrap">
+        <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+          <span className="bg-gradient-to-r from-blue-700 to-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-md whitespace-nowrap tracking-wide">
             {badge}
           </span>
         </div>

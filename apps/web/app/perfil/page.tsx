@@ -94,18 +94,23 @@ export default async function PerfilPage({ searchParams }: Props) {
         )}
 
         {/* Plan status */}
-        <div className="bg-white border border-slate-200 rounded-xl px-5 py-4 space-y-3">
+        <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 space-y-3 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-slate-500">Plano atual</p>
-              <p className="text-sm font-semibold text-slate-800 mt-0.5">
+              <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">Plano atual</p>
+              <p className="text-base font-bold text-slate-800 mt-1">
                 {PLAN_LABELS[plan] ?? plan}
+                {isPro && (
+                  <span className="ml-2 text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                    Ativo
+                  </span>
+                )}
               </p>
             </div>
             {!isPro && (
               <Link
                 href="/planos"
-                className="rounded-lg bg-blue-700 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-800 transition-colors"
+                className="rounded-xl bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
               >
                 Ver planos Pro
               </Link>
@@ -113,7 +118,7 @@ export default async function PerfilPage({ searchParams }: Props) {
           </div>
 
           {isPro && cancelAtPeriodEnd && periodEndIso && (
-            <div className="pt-1 border-t border-slate-100">
+            <div className="pt-2 border-t border-slate-100">
               <p className="text-xs text-slate-500">
                 Acesso Pro ativo até{' '}
                 <span className="font-semibold text-slate-700">{formatDate(periodEndIso)}</span>.
@@ -123,7 +128,7 @@ export default async function PerfilPage({ searchParams }: Props) {
           )}
 
           {isPro && !cancelAtPeriodEnd && (
-            <div className="pt-1 border-t border-slate-100 space-y-2">
+            <div className="pt-2 border-t border-slate-100 space-y-2">
               <p className="text-xs text-slate-400">
                 Você pode cancelar seu plano a qualquer momento.
               </p>

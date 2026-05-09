@@ -17,54 +17,64 @@ export default function TopicCard({ topic, isUserPro }: Props) {
   const accessible = topic.is_free || isUserPro
   const planLabel = topic.is_free ? 'Gratuito' : 'Pro'
 
+  if (!accessible) {
+    return (
+      <div className="rounded-2xl border border-slate-100 bg-slate-50 px-5 py-4 flex flex-col gap-3 opacity-70">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-medium leading-snug text-slate-400 truncate">
+              {topic.title}
+            </h3>
+            {topic.year && (
+              <p className="text-xs text-slate-400 mt-0.5">ENEM {topic.year}</p>
+            )}
+          </div>
+          <span className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-600">
+            {planLabel}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-3 pt-1">
+          <span className="text-xs text-slate-400">🔒 Exclusivo Pro</span>
+          <Link
+            href="/planos"
+            className="inline-block rounded-lg border border-blue-200 px-4 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-50 transition-colors"
+          >
+            Ver planos
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={`rounded-xl border px-5 py-4 flex flex-col gap-3 ${accessible ? 'border-gray-100 bg-white' : 'border-gray-100 bg-gray-50'}`}>
+    <Link
+      href={`/temas/${topic.id}`}
+      className="group rounded-2xl border border-slate-100 bg-white px-5 py-4 flex flex-col gap-3 shadow-sm hover:shadow-md hover:border-slate-200 transition-all duration-200"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className={`text-sm font-medium leading-snug ${accessible ? 'text-gray-900' : 'text-gray-400'}`}>
+          <h3 className="text-sm font-semibold leading-snug text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
             {topic.title}
           </h3>
           {topic.year && (
-            <p className="text-xs text-gray-400 mt-0.5">ENEM {topic.year}</p>
+            <p className="text-xs text-slate-400 mt-0.5">ENEM {topic.year}</p>
           )}
         </div>
-        <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-            topic.is_free
-              ? 'bg-green-50 text-green-700'
-              : 'bg-blue-50 text-blue-700'
-          }`}
-        >
+        <span className="shrink-0 rounded-full px-2 py-0.5 text-xs font-medium bg-green-50 text-green-700">
           {planLabel}
         </span>
       </div>
 
       {topic.description && (
-        <p className={`text-xs leading-relaxed ${accessible ? 'text-gray-500' : 'text-gray-400'}`}>
+        <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
           {topic.description}
         </p>
       )}
 
-      <div className="mt-1">
-        {accessible ? (
-          <Link
-            href={`/temas/${topic.id}`}
-            className="inline-block rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-blue-700"
-          >
-            Ver tema
-          </Link>
-        ) : (
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-400">Exclusivo Pro</span>
-            <Link
-              href="/planos"
-              className="inline-block rounded-lg border border-blue-200 px-4 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
-            >
-              Ver planos
-            </Link>
-          </div>
-        )}
-      </div>
-    </div>
+      <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 group-hover:text-blue-800 transition-colors duration-200">
+        Ver tema →
+      </span>
+    </Link>
   )
 }

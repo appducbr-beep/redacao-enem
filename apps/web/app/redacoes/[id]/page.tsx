@@ -131,8 +131,8 @@ export default async function EssayDetailPage({ params }: Props) {
             />
 
             {/* 2. BARRAS POR COMPETÊNCIA */}
-            <div className="rounded-xl bg-white border border-slate-200 shadow-sm px-5 py-5">
-              <h2 className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-5">
+            <div className="rounded-2xl bg-white border border-slate-100 shadow-sm px-5 py-5">
+              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-5">
                 Notas por competência
               </h2>
               <div className="space-y-4">

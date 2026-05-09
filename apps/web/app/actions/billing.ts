@@ -4,10 +4,13 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { cancelSubscription as cancelAsaasSubscription } from '@/lib/asaas'
+import {
+  processUserCancellation,
+  type ActiveSubForCancellation,
+  type CancellationDeps,
+} from '@/lib/subscriptionCancellationProcessor'
 
 export type BillingState = { error: string | null }
-
-const GUARANTEE_DAYS = 7
 
 export async function cancelCurrentSubscription(
   _prev: BillingState | undefined,
@@ -20,14 +23,6 @@ export async function cancelCurrentSubscription(
 
   if (!user) return { error: 'Não autenticado.' }
 
-  type SubRow = {
-    id: string
-    asaas_subscription_id: string
-    current_period_start: string | null
-    current_period_end: string | null
-    billing_cycle: string
-  }
-
   const { data: sub } = await supabaseAdmin
     .from('subscriptions')
     .select('id, asaas_subscription_id, current_period_start, current_period_end, billing_cycle')
@@ -37,57 +32,40 @@ export async function cancelCurrentSubscription(
 
   if (!sub) return { error: 'Nenhuma assinatura ativa encontrada.' }
 
-  const { id: subId, asaas_subscription_id: asaasId, current_period_start } = sub as SubRow
-
-  // Conservative fallback: no period_start means we treat as within guarantee
-  const withinGuarantee = current_period_start
-    ? Date.now() - new Date(current_period_start).getTime() <= GUARANTEE_DAYS * 86_400_000
-    : true
-
-  if (withinGuarantee) {
-    // --- Cancelamento imediato (dentro de 7 dias) ---
-    try {
+  const deps: CancellationDeps = {
+    now: () => new Date(),
+    cancelAsaasSubscription: async (asaasId) => {
       await cancelAsaasSubscription(asaasId)
-    } catch (err) {
-      console.error('[billing] cancelSubscription Asaas error:', err)
-      return { error: 'Erro ao cancelar no gateway. Tente novamente.' }
-    }
-
-    await supabaseAdmin
-      .from('subscriptions')
-      .update({
-        status: 'cancelled',
-        cancelled_at: new Date().toISOString(),
-        cancel_at_period_end: false,
-        refund_required: true,
-        refund_reason: '7_day_guarantee',
+    },
+    updateSub: async (id, data) => {
+      await supabaseAdmin.from('subscriptions').update(data).eq('id', id)
+    },
+    updateProfile: async (userId, plan) => {
+      await supabaseAdmin.from('profiles').update({ plan }).eq('id', userId)
+    },
+    setCreditBalance: async (userId, available, reason) => {
+      const { error } = await supabaseAdmin.rpc('set_credit_balance', {
+        target_user_id: userId,
+        available_credits: available,
+        reason,
       })
-      .eq('id', subId)
+      if (error) console.error('[billing] set_credit_balance error:', error)
+    },
+  }
 
-    await supabaseAdmin.from('profiles').update({ plan: 'free' }).eq('id', user.id)
+  let result
+  try {
+    result = await processUserCancellation(sub as ActiveSubForCancellation, deps)
+  } catch (err) {
+    console.error('[billing] processUserCancellation error:', err)
+    return { error: 'Erro ao cancelar no gateway. Tente novamente.' }
+  }
 
-    const { error: rpcError } = await supabaseAdmin.rpc('set_credit_balance', {
-      target_user_id: user.id,
-      available_credits: 3,
-      reason: 'cancel_within_7_days_return_to_free',
-    })
-    if (rpcError) console.error('[billing] set_credit_balance error:', rpcError)
+  console.log(`[billing] cancel sub=${sub.id} user=${user.id} type=${result.type}`)
 
-    console.log(`[billing] Immediate cancel sub=${subId} user=${user.id} (within guarantee)`)
+  if (result.type === 'immediate') {
     redirect('/perfil?cancelled=immediate')
   } else {
-    // --- Cancelamento programado (após 7 dias) ---
-    // NÃO deletar no Asaas agora — o cron fará isso em current_period_end.
-    // profiles.plan permanece 'pro' até a expiração.
-    await supabaseAdmin
-      .from('subscriptions')
-      .update({
-        cancel_at_period_end: true,
-        cancelled_at: new Date().toISOString(),
-      })
-      .eq('id', subId)
-
-    console.log(`[billing] Scheduled cancel sub=${subId} user=${user.id} (after guarantee)`)
     redirect('/perfil?cancelled=scheduled')
   }
 }

@@ -27,7 +27,6 @@ const DIFFERENTIALS = [
 ]
 
 export default async function PlanosPage() {
-  console.log("ASAAS_ENV:", process.env.ASAAS_ENV)
   const supabase = await createClient()
   const {
     data: { user },

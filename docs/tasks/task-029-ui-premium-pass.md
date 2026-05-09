@@ -165,3 +165,69 @@ Build:  ✓ Compiled successfully — 16 rotas, 0 erros TypeScript
 4. **Dark mode:** sistema de cores já usa Tailwind, adaptação seria natural
 5. **Ilustrações:** estados vazios com SVG (ao invés de emojis)
 6. **Gráfico de evolução:** ScoreEvolutionChart (Recharts) — já funcional, poderia ter estilo premium
+
+---
+
+## 029.1 — Temas Premium Pass
+
+**Data:** 2026-05-09
+
+### Objetivo
+
+Transformar `/temas` de uma listagem administrativa em uma experiência que transmite desafio, progressão e vontade de começar.
+
+### Mudanças em `app/temas/page.tsx`
+
+**Hero section (novo):**
+- Bloco dark gradient `from-slate-900 via-slate-800 to-slate-900` com `shadow-lg`
+- Label `ENEM · Banco de temas` em uppercase tracking-widest
+- Título: "Seu próximo treino começa aqui"
+- Subtítulo mencionando C1–C5 explicitamente
+- Pills de contagem: "✓ N temas gratuitos" e "★ N temas Pro" com fundo semitransparente
+- CTA "Assinar Pro →" inline no hero para usuários free
+- Retirado do header simples para dentro de um contexto visual rico
+
+**Seções separadas por acesso:**
+- `Disponíveis agora` — temas gratuitos (separados por divider `flex-1 h-px bg-slate-200`)
+- `Exclusivo Pro` — temas bloqueados com CTA "Desbloquear tudo →" alinhado à direita
+- Separação facilita escaneamento e reforça o valor do upgrade
+- Ordenação: gratuitos primeiro (usuário chega ao que pode usar imediatamente)
+
+**Pills de contagem:**
+- Formato anterior: pequenos, flat, pouco impacto
+- Formato novo: dentro do hero, com fundo semitransparente e contraste sobre dark background
+
+### Mudanças em `components/TopicCard.tsx`
+
+**Card acessível (gratuito ou usuário Pro):**
+- Título: `text-sm font-semibold` → `text-base font-bold` (mais hierarquia)
+- Ano movido para badge `rounded-full bg-slate-100` no canto superior direito
+- Badge de plano e CTA separados no footer do card
+- CTA: `"Ver tema →"` → `"Treinar agora →"` (mais ação, mais urgência)
+- Hover: `hover:shadow-md` → `hover:shadow-lg hover:border-blue-100 hover:-translate-y-0.5` (lift effect)
+- Ano no badge muda de cor no hover (`group-hover:bg-blue-50 group-hover:text-blue-600`)
+- Seta no CTA anima `group-hover:translate-x-0.5`
+- Descrição: `text-xs` → `text-sm` (mais legível)
+
+**Card bloqueado (Pro, usuário free):**
+- Removido: `opacity-70` no card inteiro (que tornava tudo apagado)
+- Adicionado: overlay `bg-gradient-to-br from-blue-50/40` sutil (não apaga, mas distingue)
+- Título: visível e claro em `text-slate-700` (gera desejo)
+- Descrição: visível em `text-slate-400` (dá uma amostra do conteúdo)
+- Badge: ícone de cadeado SVG + "Pro" com borda `border-blue-100`
+- CTA: `"Ver planos"` → `"Desbloquear →"` (mais direto, mais desejo)
+- Sem `opacity` — o conteúdo fica visível para gerar desejo de desbloqueio
+
+### Resultado do `npm run qa`
+
+```
+Tests:  75 passed (75)
+Lint:   2 warnings (0 errors) — pré-existentes
+Build:  ✓ Compiled successfully — 16 rotas, 0 erros TypeScript
+```
+
+### Limitações
+
+- Sem animação de entrada nas cards (framer-motion seria necessário)
+- Sem pré-visualização do conteúdo do tema nos cards bloqueados (ex: número de textos motivadores)
+- Hero não adapta copy dinamicamente ao plano do usuário Pro (poderia mostrar mensagem diferente)

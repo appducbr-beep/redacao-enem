@@ -68,8 +68,8 @@ export async function cancelCurrentSubscription(
 
     const { error: rpcError } = await supabaseAdmin.rpc('set_credit_balance', {
       target_user_id: user.id,
-      available_credits: 0,
-      reason: 'cancel_within_7_days',
+      available_credits: 3,
+      reason: 'cancel_within_7_days_return_to_free',
     })
     if (rpcError) console.error('[billing] set_credit_balance error:', rpcError)
 

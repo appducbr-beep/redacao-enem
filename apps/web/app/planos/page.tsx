@@ -56,9 +56,16 @@ export default async function PlanosPage() {
   return (
     <main className="min-h-screen bg-slate-50">
 
+      {/* Back link */}
+      <div className="px-4 pt-6 max-w-2xl mx-auto">
+        <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
+          ← Início
+        </Link>
+      </div>
+
       {/* Hero */}
       <section className="px-4">
-        <div className="max-w-2xl mx-auto text-center space-y-4 mt-12 mb-12">
+        <div className="max-w-2xl mx-auto text-center space-y-4 mt-8 mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
             Alcance a nota 1000{' '}
             <span className="text-blue-700">com feedback de verdade</span>

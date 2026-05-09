@@ -50,7 +50,7 @@ export default async function EssayDetailPage({ params }: Props) {
   const { data: essay, error } = await supabase
     .from('essays')
     .select(
-      'id, status, created_at, essay_topics(title), essay_corrections(c1, c2, c3, c4, c5, total_score, feedback, ai_model)'
+      'id, status, created_at, topic_id, essay_topics(title), essay_corrections(c1, c2, c3, c4, c5, total_score, feedback, ai_model)'
     )
     .eq('id', id)
     .eq('user_id', user.id)
@@ -59,6 +59,7 @@ export default async function EssayDetailPage({ params }: Props) {
   if (error || !essay) notFound()
 
   const status = essay.status as string
+  const topicId = essay.topic_id as string | null
   const topicTitle =
     (essay.essay_topics as unknown as { title: string } | null)?.title ?? 'Tema desconhecido'
 
@@ -186,17 +187,19 @@ export default async function EssayDetailPage({ params }: Props) {
             {/* 5. CALL TO ACTION */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link
-                href="/redacao/nova"
+                href="/temas"
                 className="flex-1 rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-semibold text-white hover:bg-blue-700 transition-colors"
               >
                 Escrever nova redação
               </Link>
-              <Link
-                href="/redacao/nova"
-                className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-              >
-                Refazer esta redação
-              </Link>
+              {topicId && (
+                <Link
+                  href={`/redacao/nova?tema_id=${topicId}`}
+                  className="flex-1 rounded-xl border border-gray-200 px-4 py-3 text-center text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Refazer esta redação
+                </Link>
+              )}
             </div>
 
             <p className="text-center text-xs text-gray-300">
@@ -233,8 +236,26 @@ export default async function EssayDetailPage({ params }: Props) {
 
         {/* ── PENDING ── */}
         {status === 'pending' && (
-          <div className="text-center py-12">
-            <p className="text-sm text-gray-500">Redação aguardando processamento...</p>
+          <div className="space-y-6">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-yellow-50 mb-4">
+                <svg className="w-7 h-7 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Aguardando processamento</h1>
+              <p className="text-sm text-gray-500 mt-1">Tema: <span className="font-medium">{topicTitle}</span></p>
+            </div>
+            <div className="rounded-xl border border-yellow-100 bg-yellow-50 px-6 py-5 text-center">
+              <p className="text-sm font-medium text-yellow-800">Esta redação ainda não foi enviada para correção.</p>
+              <p className="text-xs text-yellow-600 mt-1">Abra-a e clique em &quot;Corrigir agora&quot; para iniciar.</p>
+            </div>
+            <Link
+              href="/"
+              className="block w-full rounded-lg border border-gray-200 px-4 py-3 text-center text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Ir para o início
+            </Link>
           </div>
         )}
 

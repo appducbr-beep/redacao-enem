@@ -97,7 +97,7 @@
 | `npm run qa` passa end-to-end | ✅ | — |
 | Testes unitários: `billingRules`, `cpfUtils` | ✅ | Task 023 |
 | Testes de integração: webhook, cancelamento, cron | ✅ | Task 024 |
-| QA manual executado | ⚠️ | Ver `docs/launch/manual-qa.md` |
+| QA manual executado | ✅ | Ver `docs/launch/qa-bugs.md` — 4 bugs corrigidos |
 
 ---
 

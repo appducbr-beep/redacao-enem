@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { validateCronRequest } from '@/lib/cronAuth'
 
-// Protected by CRON_SECRET header.
-// Intended to run daily — configure in Vercel Dashboard or call manually.
-// Usage: GET /api/cron/subscriptions  (header x-cron-secret: <CRON_SECRET>)
+// Accepts two auth methods:
+//   Vercel Cron:  Authorization: Bearer <CRON_SECRET>
+//   Manual/CI:    x-cron-secret: <CRON_SECRET>
 export async function GET(request: NextRequest) {
-  const secret = request.headers.get('x-cron-secret')
-  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
-    console.warn('[cron/subscriptions] Unauthorized')
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const auth = validateCronRequest(request.headers, process.env.CRON_SECRET)
+
+  if (!auth.ok) {
+    if (auth.status === 500) {
+      console.error('[cron/subscriptions] CRON_SECRET not configured')
+      return NextResponse.json({ error: auth.error }, { status: 500 })
+    }
+    console.warn('[cron/subscriptions] unauthorized request')
+    return NextResponse.json({ error: auth.error }, { status: 401 })
   }
 
   const results: Record<string, number | string> = {}

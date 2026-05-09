@@ -32,7 +32,7 @@
 
 | Item | Status | Notas |
 |---|---|---|
-| Migrations aplicadas ao banco (`supabase db push`) | ⚠️ | Migrations 013–015 pendentes |
+| Migrations aplicadas ao banco (`supabase db push`) | ✅ | Confirmado: `supabase migration list` mostrou todas aplicadas até `20260507000015` |
 | RLS habilitado nas tabelas críticas | ✅ | Verificado nas migrations |
 | `service_role key` nunca exposta no client | ✅ | Usado apenas em Server Actions e API Routes |
 | Auth redirect URL configurado para domínio de produção | ⚠️ | Supabase Dashboard → Auth → URL Configuration |
@@ -137,11 +137,7 @@
 
 ### Obrigatórias
 
-1. **Aplicar migrations ao banco de produção:**
-   ```bash
-   supabase db push
-   ```
-   Migrations pendentes: 013, 014, 015.
+1. ✅ **Migrations aplicadas** — `supabase migration list` confirmou todas aplicadas até `20260507000015`.
 
 2. **Configurar variáveis de ambiente no Vercel (Production):**
    - `ASAAS_ENV=production`
@@ -163,10 +159,7 @@
 
 ### Recomendadas
 
-6. **Configurar Vercel Cron Job:**
-   - Path: `/api/cron/subscriptions`
-   - Schedule: `0 3 * * *` (03:00 UTC diário)
-   - Header `x-cron-secret`
+6. ✅ **Vercel Cron Job:** `vercel.json` criado com schedule `0 9 * * *`. Endpoint aceita `Authorization: Bearer` (Vercel) e `x-cron-secret` (manual).
 
 7. **Definir spending limits** na OpenAI e Groq antes de abrir para usuários.
 

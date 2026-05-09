@@ -1,53 +1,74 @@
 # Asaas — Guia de Integração
 
-## Sandbox vs Produção
+## Ambientes
 
-| | Sandbox | Produção |
-|---|---|---|
-| URL | `https://sandbox.asaas.com/api/v3` | `https://api.asaas.com/v3` |
-| `ASAAS_ENV` | `sandbox` | `production` |
-| Chave API | começa com `$aact_` | chave separada do painel prod |
-| Cobranças reais | Não | Sim |
-| Dados | isolados | isolados |
+### Sandbox (dev/preview)
 
-> Nunca usar chave de produção em dev/preview.
+```
+ASAAS_ENV=sandbox
+ASAAS_BASE_URL=https://sandbox.asaas.com/api/v3
+ASAAS_API_KEY=<chave sandbox, começa com $aact_>
+```
+
+Dashboard: `https://sandbox.asaas.com`
+
+Webhook URL:
+```
+https://redacao-enem-green.vercel.app/api/asaas/webhook
+```
+
+Cobranças reais: **Não**
+
+### Produção (go-live)
+
+```
+ASAAS_ENV=production
+ASAAS_BASE_URL=https://api.asaas.com/v3
+ASAAS_API_KEY=<chave de produção, gerada no painel prod>
+```
+
+Dashboard: `https://www.asaas.com`
+
+Webhook URL:
+```
+https://reda1000.app.br/api/asaas/webhook
+```
+
+Cobranças reais: **Sim** — configurar apenas após testes completos no sandbox.
 
 ---
 
 ## Webhook
 
-### URL de configuração
-
-| Ambiente | URL |
-|---|---|
-| Local (ngrok) | `https://<id>.ngrok.io/api/asaas/webhook` |
-| Preview (Vercel) | `https://<preview-url>/api/asaas/webhook` |
-| Produção | `https://reda1000.com.br/api/asaas/webhook` |
-
 ### Configurar no Asaas
 
-1. Asaas Dashboard → Configurações → Integrações → Webhooks
-2. Adicionar URL
-3. Selecionar eventos (ver abaixo)
-4. Informar token de autenticação (valor de `ASAAS_WEBHOOK_TOKEN`)
+1. Asaas Dashboard → **Configurações → Integrações → Webhooks**
+2. Clicar em **Adicionar webhook**
+3. Preencher URL (ver acima conforme ambiente)
+4. Selecionar eventos (ver tabela abaixo)
+5. Informar token de autenticação: valor de `ASAAS_WEBHOOK_TOKEN`
+6. Salvar
 
-### Eventos utilizados
+### Eventos
 
 | Evento | Ação no sistema |
 |---|---|
 | `PAYMENT_CONFIRMED` | Ativa Pro, define período, seta créditos = 20 |
-| `PAYMENT_RECEIVED` | Mesmo que `PAYMENT_CONFIRMED` (Asaas usa os dois) |
+| `PAYMENT_RECEIVED` | Mesmo que `PAYMENT_CONFIRMED` (Asaas pode usar os dois) |
+| `SUBSCRIPTION_CREATED` | Sem ação atual (subscription já criada no subscribe action) |
+| `SUBSCRIPTION_UPDATED` | Sem ação atual |
 | `SUBSCRIPTION_CANCELLED` | Cancela subscription no banco, `plan → free` |
 | `SUBSCRIPTION_DELETED` | Mesmo que `SUBSCRIPTION_CANCELLED` |
 
 ### Header de autenticação
 
-O Asaas envia o token no header:
+O Asaas envia o token em cada evento:
+
 ```
 asaas-access-token: <ASAAS_WEBHOOK_TOKEN>
 ```
 
-O webhook valida antes de processar qualquer evento.
+O webhook valida esse header antes de processar. Token inválido → `401 Unauthorized`.
 
 ### Idempotência
 
@@ -57,40 +78,51 @@ O sistema usa `webhook_logs.asaas_event_id UNIQUE` para evitar reprocessamento. 
 
 ## Como reenviar webhook
 
-1. Asaas Dashboard → Configurações → Webhooks → Histórico
-2. Localizar o evento
-3. Clicar em "Reenviar"
+1. Asaas Dashboard → Configurações → Webhooks → **Histórico**
+2. Localizar o evento na lista
+3. Clicar em **Reenviar**
 
-Útil para depurar problemas de processamento. O sistema detecta duplicatas automaticamente.
+Útil para depurar. O sistema detecta duplicatas automaticamente — reenvios não duplicam créditos.
 
 ---
 
-## Como testar pagamento
+## Como testar pagamento (sandbox)
 
-### Cartões de teste (sandbox)
+### Cartões de teste
 
 | Bandeira | Número | CVV | Validade |
 |---|---|---|---|
 | Visa | 4111111111111111 | 123 | 12/2030 |
 | Mastercard | 5500000000000004 | 123 | 12/2030 |
 
-### Fluxo
+### Fluxo completo
 
-1. Iniciar assinatura via `/planos`
-2. Preencher CPF (qualquer CPF válido no sandbox)
-3. No checkout do Asaas, usar cartão de teste
-4. Aguardar webhook `PAYMENT_CONFIRMED` (com ngrok ativo)
-5. Verificar banco: `subscriptions`, `credit_wallets`, `profiles`
+1. Iniciar assinatura em `/planos` com usuário free
+2. Preencher CPF na modal (CPF válido — use um gerador de CPF de teste)
+3. No checkout Asaas, usar cartão de teste acima
+4. Com ngrok ativo, aguardar webhook `PAYMENT_CONFIRMED`
+5. Verificar no banco:
+
+```sql
+SELECT status, current_period_start, current_period_end, next_credit_reset_at
+FROM subscriptions WHERE user_id = 'USER_ID';
+
+SELECT credits_available FROM credit_wallets WHERE user_id = 'USER_ID';
+-- Esperado: 20
+
+SELECT plan FROM profiles WHERE id = 'USER_ID';
+-- Esperado: pro
+```
 
 ---
 
 ## Como cancelar assinatura (painel Asaas)
 
-1. Asaas Dashboard → Assinaturas
-2. Localizar a assinatura
-3. Ações → Cancelar
+1. Asaas Dashboard → **Assinaturas**
+2. Localizar a assinatura pelo nome do cliente ou ID
+3. Clicar em **Ações → Cancelar**
 
-Nota: o cancelamento via painel Asaas dispara webhook `SUBSCRIPTION_CANCELLED`, que o sistema processa para atualizar o banco.
+O cancelamento via painel dispara `SUBSCRIPTION_CANCELLED`, que o sistema processa para atualizar `plan → free` no banco.
 
 ---
 
@@ -107,7 +139,7 @@ WHERE user_id = 'USER_ID';
 SELECT credits_available, credits_total, credits_used
 FROM credit_wallets WHERE user_id = 'USER_ID';
 
--- Log do webhook
+-- Log do webhook (últimos 5 eventos)
 SELECT event, asaas_event_id, processed, error_message, created_at
 FROM webhook_logs
 ORDER BY created_at DESC LIMIT 5;
@@ -117,8 +149,8 @@ ORDER BY created_at DESC LIMIT 5;
 
 ## Pendência: Asaas DELETE para cancelamento programado
 
-Atualmente, o cancelamento após 7 dias (`cancel_at_period_end = true`) **não** chama `DELETE /subscriptions/{id}` no Asaas imediatamente. O cron expira a subscription no banco quando `current_period_end <= now()`, mas não cancela no Asaas.
+Cancelamentos após 7 dias (`cancel_at_period_end = true`) **não** chamam `DELETE /subscriptions/{id}` no Asaas imediatamente. O cron expira a subscription no banco quando `current_period_end <= now()`, mas não cancela no Asaas.
 
-**Risco:** o Asaas pode tentar cobrar novamente após o período.
+**Risco:** Asaas pode tentar cobrar novamente após `current_period_end`.
 
-**Ação necessária antes do lançamento:** Monitorar manualmente no painel Asaas ou implementar a chamada DELETE no cron antes de expirar a assinatura.
+**Ação:** Monitorar manualmente no painel Asaas até que a chamada DELETE seja implementada no cron.

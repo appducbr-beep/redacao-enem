@@ -8,12 +8,25 @@ GET /api/cron/subscriptions
 
 ### Autenticação
 
-Header obrigatório:
+O endpoint aceita dois métodos, em ordem de prioridade:
+
+**1. Vercel Cron** (automático quando configurado em `vercel.json`):
 ```
-x-cron-secret: <valor de CRON_SECRET>
+Authorization: Bearer <CRON_SECRET>
 ```
 
-Sem o header correto: `401 Unauthorized`.
+**2. Testes manuais / GitHub Actions / CI:**
+```
+x-cron-secret: <CRON_SECRET>
+```
+
+| Situação | Resposta |
+|---|---|
+| Token correto (qualquer método) | `200 { ok: true, ... }` |
+| Token ausente ou inválido | `401 { error: "Unauthorized" }` |
+| `CRON_SECRET` não configurado no servidor | `500 { error: "CRON_SECRET not configured" }` |
+
+> Nunca logar ou expor o valor do `CRON_SECRET`. O endpoint loga apenas `unauthorized request` (sem o token).
 
 ### Resposta de sucesso
 
@@ -43,7 +56,7 @@ Sem o header correto: `401 Unauthorized`.
 - `set_credit_balance(user_id, 20, 'annual_monthly_credit_reset')`
 - `next_credit_reset_at += 1 mês`
 
-**Resultado:** usuário anual recebe 20 créditos todo mês sem precisar renovar.
+**Resultado:** usuário anual recebe 20 créditos por mês sem precisar renovar.
 
 ---
 
@@ -63,40 +76,66 @@ Sem o header correto: `401 Unauthorized`.
 
 **Resultado:** usuário que cancelou após 7 dias perde acesso Pro quando o período termina.
 
-> ⚠️ **Limitação atual:** o cron não chama `DELETE /subscriptions/{id}` no Asaas.
-> O Asaas pode tentar cobrar novamente após `current_period_end`.
-> Monitorar manualmente até que a chamada DELETE seja implementada.
+> ⚠️ **Limitação:** o cron não chama `DELETE /subscriptions/{id}` no Asaas.
+> Monitorar manualmente no painel Asaas até que isso seja implementado.
 
 ---
 
-## Frequência recomendada
+## Frequência
 
-**Diário às 03:00 UTC** — a maioria das assinaturas expira à meia-noite do fuso do cliente.
+**Diário às 09:00 UTC** (06:00 BRT) — definido em `vercel.json`.
 
-Schedule cron: `0 3 * * *`
+Schedule: `0 9 * * *`
 
 ---
 
-## Como configurar no Vercel
+## Opção A — vercel.json (configurado)
 
-> Ainda não configurado. Fazer antes do lançamento.
+O arquivo `apps/web/vercel.json` já está criado:
 
-1. Vercel Dashboard → Project → Settings → Cron Jobs
-2. Clicar em "Add Cron Job"
-3. Preencher:
-   - **Path:** `/api/cron/subscriptions`
-   - **Schedule:** `0 3 * * *`
-4. Não é possível adicionar headers diretamente no Vercel Cron (limitação).
-   Alternativa: usar serviço externo (cron-job.org, EasyCron, GitHub Actions) para chamar com header.
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/subscriptions",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
+```
 
-### Alternativa com GitHub Actions
+> ✅ O endpoint aceita `Authorization: Bearer <CRON_SECRET>` (Vercel) e `x-cron-secret` (manual).
+> O Vercel Cron funciona corretamente com `vercel.json`.
+
+---
+
+## Opção B — execução manual / GitHub Actions (funcional agora)
+
+### Chamada manual
+
+```bash
+# Local
+curl -X GET http://localhost:3000/api/cron/subscriptions \
+  -H "x-cron-secret: <CRON_SECRET>"
+
+# Preview (sandbox)
+curl -X GET https://redacao-enem-green.vercel.app/api/cron/subscriptions \
+  -H "x-cron-secret: <CRON_SECRET>"
+
+# Produção
+curl -X GET https://reda1000.app.br/api/cron/subscriptions \
+  -H "x-cron-secret: <CRON_SECRET>"
+```
+
+### GitHub Actions (diário)
+
+Criar `.github/workflows/cron.yml`:
 
 ```yaml
-# .github/workflows/cron.yml
 name: Daily subscription cron
 on:
   schedule:
-    - cron: '0 3 * * *'
+    - cron: '0 9 * * *'
 jobs:
   cron:
     runs-on: ubuntu-latest
@@ -107,31 +146,27 @@ jobs:
             -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
 ```
 
----
-
-## Como testar manualmente
-
-```bash
-# Local
-curl -X GET http://localhost:3000/api/cron/subscriptions \
-  -H "x-cron-secret: <CRON_SECRET>"
-
-# Produção
-curl -X GET https://reda1000.com.br/api/cron/subscriptions \
-  -H "x-cron-secret: <CRON_SECRET>"
-```
+Adicionar secrets no GitHub: `APP_URL` e `CRON_SECRET`.
 
 ---
 
 ## Simular expiração para teste
 
 ```sql
--- Colocar current_period_end no passado para acionar expiração
+-- 1. Colocar period_end no passado
 UPDATE subscriptions
 SET current_period_end = now() - interval '1 hour'
 WHERE user_id = 'USER_ID' AND status = 'active';
 
--- Chamar o cron → expirations deve ser 1
+-- 2. Chamar o cron manualmente
+-- Response esperada: { "ok": true, "expirations": 1 }
+
+-- 3. Verificar resultado
+SELECT status FROM subscriptions WHERE user_id = 'USER_ID';
+-- Esperado: cancelled
+
+SELECT plan FROM profiles WHERE id = 'USER_ID';
+-- Esperado: free
 ```
 
 ---
@@ -139,7 +174,7 @@ WHERE user_id = 'USER_ID' AND status = 'active';
 ## Logs esperados
 
 ```
-[cron/subscriptions] { credit_resets: 1, expirations: 0 }
+[cron/subscriptions] { credit_resets: 0, expirations: 1 }
 ```
 
-Acessar em: Vercel Dashboard → Deployments → Functions → Logs.
+Acessar em: Vercel Dashboard → Project → Logs (filtrar por `/api/cron/subscriptions`).

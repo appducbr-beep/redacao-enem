@@ -15,76 +15,113 @@
 
 ---
 
-## Variáveis de ambiente
+## Passo a passo: configurar variáveis de ambiente
 
-### Onde configurar
+1. Vercel Dashboard → selecionar o projeto `reda1000`
+2. Ir em **Settings → Environment Variables**
+3. Para cada variável:
+   - Clicar em **Add New**
+   - Preencher **Key** e **Value**
+   - Selecionar os ambientes (Preview, Production ou ambos)
+   - Clicar em **Save**
+4. Após adicionar todas as variáveis: **Deployments → Redeploy** (o último deployment)
 
-Vercel Dashboard → Project → Settings → Environment Variables.
+---
 
-Cada variável pode ser definida para:
-- **Development** — não usada (local usa `.env.local`)
-- **Preview** — branches de feature, PRs
-- **Production** — branch `main`
+## Variáveis obrigatórias
 
-### Quais variáveis são necessárias
+### Compartilhadas (Preview + Production — mesmo valor)
 
-Ver tabela completa em `docs/launch/env-vars.md`.
+| Variável | Exemplo / Onde obter |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API → Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Settings → API → anon public |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API → service_role (**sensível**) |
+| `OPENAI_API_KEY` | platform.openai.com → API Keys (**sensível**) |
+| `OPENAI_MODEL` | `gpt-4o` |
+| `GROQ_API_KEY` | console.groq.com (**sensível**) |
+| `GROQ_VISION_MODEL` | `meta-llama/llama-4-scout-17b-16e-instruct` |
+| `CRON_SECRET` | `openssl rand -hex 32` (**sensível**) |
 
-### Diferença Preview vs Production
+### Específicas por ambiente
 
 | Variável | Preview | Production |
 |---|---|---|
 | `ASAAS_ENV` | `sandbox` | `production` |
-| `ASAAS_API_KEY` | chave sandbox | chave produção |
+| `ASAAS_API_KEY` | chave sandbox (`$aact_...`) | chave de produção (**sensível**) |
 | `ASAAS_BASE_URL` | `https://sandbox.asaas.com/api/v3` | `https://api.asaas.com/v3` |
-| `NEXT_PUBLIC_APP_URL` | URL do preview (gerada pelo Vercel) | `https://reda1000.com.br` |
-| `ASAAS_WEBHOOK_TOKEN` | token de teste | token de produção |
+| `ASAAS_WEBHOOK_TOKEN` | token sandbox | token produção (`openssl rand -hex 32`) |
+| `NEXT_PUBLIC_APP_URL` | `https://redacao-enem-green.vercel.app` | `https://reda1000.app.br` |
 
 ---
 
-## Quando fazer redeploy
+## URL atual (sandbox / preview)
 
-| Situação | Ação |
-|---|---|
-| Mudança de variável de ambiente | Vercel Dashboard → Deployments → Redeploy |
-| Push para `main` | Redeploy automático (se CI configurado) |
-| Mudança de migration no Supabase | Aplicar migration + redeploy |
-| Rotação de segredos (tokens, chaves) | Atualizar var + redeploy |
-
----
-
-## Configurar Vercel Cron Job
-
-> Não configurado ainda. Fazer antes do lançamento.
-
-1. Vercel Dashboard → Project → Settings → Cron Jobs → Add Cron Job
-2. Path: `/api/cron/subscriptions`
-3. Schedule: `0 3 * * *` (03:00 UTC diário)
-4. Adicionar header: `x-cron-secret: <valor de CRON_SECRET>`
-
-Alternativa: usar serviço externo (cron-job.org, EasyCron) para chamar a rota com o header correto.
-
----
-
-## URL atual (sandbox)
-
-O projeto está em desenvolvimento. URL de produção a ser definida no go-live.
-
-Para testes locais com ngrok:
-```bash
-ngrok http 3000
-# Usar https://<id>.ngrok.io como base para webhook Asaas
 ```
+https://redacao-enem-green.vercel.app
+```
+
+Webhook Asaas configurado para:
+```
+https://redacao-enem-green.vercel.app/api/asaas/webhook
+```
+
+---
+
+## Quando usar sandbox vs produção
+
+| Situação | `ASAAS_ENV` | `ASAAS_BASE_URL` |
+|---|---|---|
+| Desenvolvimento local | `sandbox` | sandbox URL |
+| Vercel Preview (testes) | `sandbox` | sandbox URL |
+| Vercel Production (go-live) | `production` | produção URL |
+
+> Nunca colocar `ASAAS_ENV=production` em Preview — pode criar cobranças reais acidentais.
+
+---
+
+## Como forçar redeploy após alterar variável
+
+Após salvar uma variável no Vercel:
+
+1. Ir em **Deployments**
+2. Clicar nos três pontos (`...`) do deployment mais recente
+3. Clicar em **Redeploy**
+4. Confirmar com **Redeploy**
+
+O novo deployment já vai usar os valores atualizados.
+
+---
+
+## Cron Job (vercel.json)
+
+O arquivo `apps/web/vercel.json` define o cron diário:
+
+```json
+{
+  "crons": [
+    {
+      "path": "/api/cron/subscriptions",
+      "schedule": "0 9 * * *"
+    }
+  ]
+}
+```
+
+**Schedule:** `0 9 * * *` = 09:00 UTC diário (06:00 BRT).
+
+> ✅ O endpoint aceita `Authorization: Bearer <CRON_SECRET>` (Vercel) e `x-cron-secret` (manual). Ambos os métodos funcionam.
 
 ---
 
 ## Checklist de deploy para produção
 
-- [ ] `ASAAS_ENV=production` configurado
-- [ ] `ASAAS_API_KEY` (produção) configurado
-- [ ] `ASAAS_BASE_URL=https://api.asaas.com/v3` configurado
-- [ ] `NEXT_PUBLIC_APP_URL` = domínio real
+- [ ] Root Directory = `apps/web` confirmado
+- [ ] Todas as variáveis configuradas em **Production**
+- [ ] `ASAAS_ENV=production` em Production
+- [ ] `ASAAS_BASE_URL=https://api.asaas.com/v3` em Production
+- [ ] `NEXT_PUBLIC_APP_URL` = domínio real em Production
 - [ ] Supabase Auth URL atualizada para domínio de produção
-- [ ] Migrations aplicadas ao banco de produção
 - [ ] Webhook Asaas configurado com URL de produção
 - [ ] `npm run qa` passando localmente antes do deploy
+- [ ] Redeploy feito após configurar variáveis

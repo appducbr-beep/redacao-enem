@@ -105,9 +105,15 @@ export default function TopicCard({ topic, isUserPro }: Props) {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-1">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-100 px-2.5 py-1 text-xs font-bold text-green-700">
-          Gratuito
-        </span>
+        {topic.is_free ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-100 px-2.5 py-1 text-xs font-bold text-green-700">
+            Gratuito
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-100 px-2.5 py-1 text-xs font-bold text-blue-700">
+            Pro
+          </span>
+        )}
         <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 group-hover:text-blue-800 group-hover:gap-2 transition-all duration-200">
           Treinar agora
           <ArrowIcon className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform duration-200" />

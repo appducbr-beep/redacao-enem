@@ -57,61 +57,75 @@ export default async function PlanosPage() {
     <main className="min-h-screen bg-slate-50">
 
       {/* Back link */}
-      <div className="px-4 pt-6 max-w-2xl mx-auto">
+      <div className="px-4 pt-6 max-w-4xl mx-auto">
         <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
           ← Início
         </Link>
       </div>
 
       {/* Hero */}
-      <section className="px-4">
-        <div className="max-w-2xl mx-auto text-center space-y-4 mt-8 mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight">
-            Alcance a nota 1000{' '}
-            <span className="text-blue-600">com feedback de verdade</span>
-          </h1>
-          <p className="text-lg text-slate-500">
-            Diagnósticos rápidos e precisos baseados nos critérios oficiais do ENEM
-          </p>
-          <p className="text-sm text-slate-400">
-            Descubra exatamente onde você perde pontos e como melhorar.
-          </p>
+      <section className="px-4 mt-6 mb-10">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white border border-slate-200 shadow-sm rounded-3xl px-6 py-10 sm:px-10 text-center">
 
-          {user && userPlan === 'free' && (
-            <div className="pt-1 space-y-1">
-              <p className="text-sm font-semibold text-blue-700">
-                Seu plano atual: Gratuito
-              </p>
-              <p className="text-xs text-slate-500">
-                Desbloqueie mais redações e evolua mais rápido.
-              </p>
+            {/* Badge */}
+            <div className="inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500 mb-6">
+              Planos Reda1000
             </div>
-          )}
-          {user && userPlan === 'pro' && (
-            <div className="pt-1 space-y-3">
-              <p className="text-sm font-semibold text-green-700">
-                Você já tem o plano Pro ✓
-              </p>
-              {cancelAtPeriodEnd && periodEndIso ? (
-                <p className="text-xs text-slate-500">
-                  Renovação cancelada. Acesso ativo até{' '}
-                  <span className="font-semibold">
-                    {new Date(periodEndIso).toLocaleDateString('pt-BR', {
-                      day: '2-digit', month: '2-digit', year: 'numeric',
-                    })}
-                  </span>
-                  .
+
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight mb-4">
+              Alcance a nota 1000{' '}
+              <span className="text-blue-600">com feedback de verdade</span>
+            </h1>
+
+            {/* Subtitle */}
+            <p className="text-lg text-slate-500 max-w-xl mx-auto">
+              Receba diagnósticos rápidos e precisos baseados nos critérios oficiais do ENEM.
+            </p>
+
+            {/* Aux text */}
+            <p className="text-sm text-slate-400 max-w-lg mx-auto mt-2">
+              Descubra onde você perde pontos, acompanhe sua evolução e treine com mais consistência.
+            </p>
+
+            {/* Plan status */}
+            {user && userPlan === 'free' && (
+              <div className="mt-6 space-y-2">
+                <span className="inline-flex items-center rounded-full bg-slate-100 border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600">
+                  Seu plano atual: Gratuito
+                </span>
+                <p className="text-xs text-slate-400 block">
+                  Desbloqueie mais redações e evolua mais rápido.
                 </p>
-              ) : (
-                <>
-                  <p className="text-xs text-slate-400">
-                    Você pode cancelar seu plano a qualquer momento.
+              </div>
+            )}
+            {user && userPlan === 'pro' && (
+              <div className="mt-6 space-y-3">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-100 px-3 py-1.5 text-xs font-semibold text-green-700">
+                  ✓ Você já tem o plano Pro
+                </span>
+                {cancelAtPeriodEnd && periodEndIso ? (
+                  <p className="text-xs text-slate-500 block">
+                    Renovação cancelada. Acesso ativo até{' '}
+                    <span className="font-semibold">
+                      {new Date(periodEndIso).toLocaleDateString('pt-BR', {
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                      })}
+                    </span>.
                   </p>
-                  <CancelSubscriptionButton />
-                </>
-              )}
-            </div>
-          )}
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-400">
+                      Você pode cancelar seu plano a qualquer momento.
+                    </p>
+                    <CancelSubscriptionButton />
+                  </div>
+                )}
+              </div>
+            )}
+
+          </div>
         </div>
       </section>
 

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { sanitizePhone } from '@/lib/phoneUtils'
+import { trackServerEvent } from '@/lib/analytics'
 
 type AuthState = { error: string | null; success?: string }
 
@@ -13,13 +14,14 @@ export async function signIn(
 ): Promise<AuthState> {
   const supabase = await createClient()
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: formData.get('email') as string,
     password: formData.get('password') as string,
   })
 
   if (error) return { error: error.message }
 
+  trackServerEvent('login_completed', data.user?.id)
   redirect('/')
 }
 
@@ -54,6 +56,7 @@ export async function signUp(
     if (acquisitionSource) updates.acquisition_source = acquisitionSource
 
     await supabaseAdmin.from('profiles').update(updates).eq('id', data.user.id)
+    trackServerEvent('signup_completed', data.user.id, { plan: 'free' })
   }
 
   redirect('/')

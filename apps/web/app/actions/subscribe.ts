@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { trackServerEvent } from '@/lib/analytics'
 import {
   findCustomerByEmail,
   createCustomer,
@@ -91,6 +92,7 @@ export async function createProSubscription(
       { onConflict: 'user_id' }
     )
 
+    trackServerEvent('checkout_started', user.id, { plan, billing_cycle: billingCycle })
     return { checkoutUrl: firstPayment.invoiceUrl }
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erro inesperado ao criar assinatura.'

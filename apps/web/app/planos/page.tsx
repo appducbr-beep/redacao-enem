@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabaseServer'
 import PricingSection from '@/components/plans/PricingSection'
 import CancelSubscriptionButton from '@/app/perfil/CancelSubscriptionButton'
+import { trackServerEvent } from '@/lib/analytics'
 
 const DIFFERENTIALS = [
   {
@@ -35,6 +36,8 @@ export default async function PlanosPage() {
   let userPlan: string | null = null
   let cancelAtPeriodEnd = false
   let periodEndIso: string | null = null
+
+  trackServerEvent('plans_viewed', user?.id)
 
   if (user) {
     const [profileData, subData] = await Promise.all([

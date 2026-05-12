@@ -9,6 +9,7 @@ import type { RecentEssayRow } from '@/components/dashboard/RecentEssaysTable'
 import LandingPage from '@/components/landing/LandingPage'
 import OnboardingCard from '@/components/dashboard/OnboardingCard'
 import { getOnboardingStatus } from '@/lib/onboardingUtils'
+import { trackServerEvent } from '@/lib/analytics'
 
 export const metadata: Metadata = {
   title: 'Reda1000 — Treine redação para o ENEM com feedback detalhado',
@@ -23,6 +24,7 @@ export default async function Home() {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    trackServerEvent('landing_viewed')
     return <LandingPage />
   }
 
@@ -116,6 +118,7 @@ export default async function Home() {
 
   const recentEssays = essays.slice(0, 5)
   const onboardingStatus = getOnboardingStatus(essays)
+  if (onboardingStatus === 'not_started') trackServerEvent('onboarding_started', user.id)
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8">

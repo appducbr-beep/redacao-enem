@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { sanitizePhone } from '@/lib/phoneUtils'
+import { trackServerEvent } from '@/lib/analytics'
 
 type ProfileState = { error: string | null; success?: string }
 
@@ -41,6 +42,7 @@ export async function updateProfile(
 
   if (error) return { error: 'Erro ao salvar. Tente novamente.' }
 
+  trackServerEvent('profile_updated', user.id)
   revalidatePath('/perfil')
   revalidatePath('/')
 

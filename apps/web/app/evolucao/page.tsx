@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
+import { trackServerEvent } from '@/lib/analytics'
 import EvolutionSummaryCards from '@/components/evolution/EvolutionSummaryCards'
 import ScoreEvolutionChart from '@/components/evolution/ScoreEvolutionChart'
 import CompetencyAverageBars from '@/components/evolution/CompetencyAverageBars'
@@ -51,6 +52,8 @@ export default async function EvolucaoPage() {
   } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  trackServerEvent('evolution_viewed', user.id)
 
   const { data: rows } = await supabase
     .from('essays')

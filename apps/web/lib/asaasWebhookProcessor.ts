@@ -1,3 +1,5 @@
+import { trackServerEvent } from './analytics'
+
 const PRO_CREDITS_PER_CYCLE = 20
 
 const CREDIT_REASON_BY_BILLING_CYCLE: Record<string, string> = {
@@ -130,6 +132,7 @@ export async function processPaymentConfirmed(
   })
 
   await deps.updateProfile(sub.user_id, 'pro')
+  trackServerEvent('subscription_confirmed', sub.user_id, { billing_cycle: billingCycle })
 
   const creditReason =
     CREDIT_REASON_BY_BILLING_CYCLE[billingCycle] ?? CREDIT_REASON_BY_BILLING_CYCLE.monthly
@@ -149,4 +152,5 @@ export async function processSubscriptionCancelled(
   })
 
   await deps.updateProfile(sub.user_id, 'free')
+  trackServerEvent('subscription_cancelled', sub.user_id, { source: 'webhook' })
 }

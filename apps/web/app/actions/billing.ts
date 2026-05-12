@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { cancelSubscription as cancelAsaasSubscription } from '@/lib/asaas'
+import { trackServerEvent } from '@/lib/analytics'
 import {
   processUserCancellation,
   type ActiveSubForCancellation,
@@ -64,8 +65,10 @@ export async function cancelCurrentSubscription(
   console.log(`[billing] cancel sub=${sub.id} user=${user.id} type=${result.type}`)
 
   if (result.type === 'immediate') {
+    trackServerEvent('subscription_cancelled', user.id, { cancellation_type: 'immediate' })
     redirect('/perfil?cancelled=immediate')
   } else {
+    trackServerEvent('subscription_cancel_scheduled', user.id, { cancellation_type: 'scheduled' })
     redirect('/perfil?cancelled=scheduled')
   }
 }

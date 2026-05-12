@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabaseServer'
 import { extractTextFromImage } from '@/lib/groqOcr'
+import { trackServerEvent } from '@/lib/analytics'
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const
 type AllowedMimeType = (typeof ALLOWED_TYPES)[number]
@@ -27,13 +28,17 @@ export async function extractEssayTextFromImage(formData: FormData): Promise<Ocr
     return { error: 'Imagem muito grande. Máximo 8 MB.' }
   }
 
+  trackServerEvent('ocr_started', user.id, { file_type: file.type, file_size: file.size })
   try {
     const arrayBuffer = await file.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
     const text = await extractTextFromImage(base64, file.type as AllowedMimeType)
+    trackServerEvent('ocr_completed', user.id)
     return { text }
   } catch (err) {
-    console.error('[OCR] falhou:', err instanceof Error ? err.message : err)
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[OCR] falhou:', msg)
+    trackServerEvent('ocr_failed', user.id, { error: msg })
     return { error: 'Falha ao extrair texto da imagem. Tente novamente.' }
   }
 }

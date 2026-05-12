@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { validateCronRequest } from '@/lib/cronAuth'
+import { trackServerEvent } from '@/lib/analytics'
 
 // Accepts two auth methods:
 //   Vercel Cron:  Authorization: Bearer <CRON_SECRET>
@@ -42,5 +43,6 @@ export async function GET(request: NextRequest) {
   }
 
   console.log('[cron/subscriptions]', results)
+  trackServerEvent('cron_subscriptions_processed', undefined, results)
   return NextResponse.json({ ok: true, ...results })
 }

@@ -2,6 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
+import { trackServerEvent } from '@/lib/analytics'
 
 type SubmitState = { error: string | null }
 
@@ -78,5 +79,6 @@ export async function submitEssay(
 
   await supabase.from('essays').update({ status: 'processing' }).eq('id', essay.id)
 
+  trackServerEvent('essay_submitted', user.id, { essay_id: essay.id, topic_id: temaId })
   redirect(`/redacoes/${essay.id}`)
 }

@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabaseServer'
 import EssayHistoryList from '@/components/EssayHistoryList'
+import { trackServerEvent } from '@/lib/analytics'
 
 export type EssayItem = {
   id: string
@@ -18,6 +19,8 @@ export default async function RedacoesPage() {
   } = await supabase.auth.getUser()
 
   if (!user) redirect('/login')
+
+  trackServerEvent('history_viewed', user.id)
 
   const { data: rows } = await supabase
     .from('essays')

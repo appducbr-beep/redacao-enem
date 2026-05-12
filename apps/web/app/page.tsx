@@ -7,6 +7,8 @@ import DashboardStatsCard from '@/components/dashboard/DashboardStatsCard'
 import RecentEssaysTable from '@/components/dashboard/RecentEssaysTable'
 import type { RecentEssayRow } from '@/components/dashboard/RecentEssaysTable'
 import LandingPage from '@/components/landing/LandingPage'
+import OnboardingCard from '@/components/dashboard/OnboardingCard'
+import { getOnboardingStatus } from '@/lib/onboardingUtils'
 
 export const metadata: Metadata = {
   title: 'Reda1000 — Treine redação para o ENEM com feedback detalhado',
@@ -113,6 +115,7 @@ export default async function Home() {
       : null
 
   const recentEssays = essays.slice(0, 5)
+  const onboardingStatus = getOnboardingStatus(essays)
 
   return (
     <main className="min-h-screen bg-slate-50 px-4 py-8">
@@ -133,6 +136,9 @@ export default async function Home() {
           </div>
           <LogoutButton />
         </div>
+
+        {/* Onboarding */}
+        <OnboardingCard status={onboardingStatus} />
 
         {/* Motivational banner */}
         <div className="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 px-6 py-6 text-white shadow-md flex items-center justify-between gap-4">

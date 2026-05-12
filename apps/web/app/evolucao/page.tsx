@@ -98,23 +98,23 @@ export default async function EvolucaoPage() {
   if (essays.length === 0) {
     return (
       <main className="min-h-screen bg-slate-50 px-4 py-10">
-        <div className="max-w-3xl mx-auto">
-          <div className="mb-8">
-            <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
-              ← Início
-            </Link>
-          </div>
-          <div className="text-center space-y-4 py-16">
-            <div className="text-4xl">📈</div>
-            <h1 className="text-2xl font-bold text-slate-800">Minha evolução</h1>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
-              Corrija sua primeira redação para começar a acompanhar sua evolução por competência.
-            </p>
+        <div className="max-w-3xl mx-auto space-y-8">
+          <Link href="/" className="text-sm text-slate-400 hover:text-slate-600 transition-colors">
+            ← Início
+          </Link>
+          <div className="rounded-2xl bg-white border border-slate-100 shadow-sm px-6 py-14 text-center space-y-5">
+            <div className="text-5xl">📈</div>
+            <div className="space-y-1.5">
+              <h1 className="text-xl font-bold text-slate-800">Minha evolução</h1>
+              <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                Envie e corrija sua primeira redação para começar a acompanhar sua evolução por competência.
+              </p>
+            </div>
             <Link
               href="/temas"
-              className="inline-block rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+              className="inline-block rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
             >
-              Começar uma redação
+              Enviar primeira redação
             </Link>
           </div>
         </div>

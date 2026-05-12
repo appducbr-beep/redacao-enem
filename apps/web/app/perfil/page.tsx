@@ -102,6 +102,16 @@ export default async function PerfilPage({ searchParams }: Props) {
           </div>
         )}
 
+        {/* Profile completion nudge */}
+        {(!p?.phone || !p?.target_score) && (
+          <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 flex items-start gap-2.5">
+            <span className="text-blue-500 text-sm shrink-0 mt-0.5">ℹ</span>
+            <p className="text-xs text-blue-700 leading-relaxed">
+              Adicione seu telefone e objetivo de nota para personalizar sua experiência na plataforma.
+            </p>
+          </div>
+        )}
+
         {/* Plan status */}
         <div className="bg-white border border-slate-100 rounded-2xl px-5 py-4 space-y-3 shadow-sm">
           <div className="flex items-center justify-between">

@@ -38,19 +38,27 @@ export default function EssayHistoryList({ essays }: { essays: EssayItem[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 space-y-3">
-          <p className="text-sm text-slate-500">
-            {filter === 'all'
-              ? 'Você ainda não enviou nenhuma redação.'
-              : 'Nenhuma redação encontrada com esse filtro.'}
-          </p>
-          {filter === 'all' && (
-            <Link
-              href="/temas"
-              className="inline-block text-sm font-medium text-blue-600 hover:text-blue-800"
-            >
-              Escrever primeira redação →
-            </Link>
+        <div className="text-center py-16 space-y-4">
+          {filter === 'all' ? (
+            <>
+              <div className="text-4xl">✍️</div>
+              <div className="space-y-1.5">
+                <p className="text-base font-semibold text-slate-700">Nenhuma redação enviada ainda</p>
+                <p className="text-sm text-slate-500 max-w-xs mx-auto leading-relaxed">
+                  Envie sua primeira redação e comece a acompanhar sua evolução por competência.
+                </p>
+              </div>
+              <Link
+                href="/temas"
+                className="inline-block rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                Enviar primeira redação
+              </Link>
+            </>
+          ) : (
+            <p className="text-sm text-slate-500">
+              Nenhuma redação encontrada com esse filtro.
+            </p>
           )}
         </div>
       ) : (

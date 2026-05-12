@@ -33,12 +33,21 @@ export default async function PerfilPage({ searchParams }: Props) {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, plan')
+    .select('full_name, plan, phone, target_score, school_stage, marketing_consent')
     .eq('id', user.id)
     .single()
 
-  const plan = (profile as { full_name?: string; plan?: string } | null)?.plan ?? 'free'
-  const fullName = (profile as { full_name?: string; plan?: string } | null)?.full_name ?? ''
+  type ProfileRow = {
+    full_name?: string
+    plan?: string
+    phone?: string | null
+    target_score?: number | null
+    school_stage?: string | null
+    marketing_consent?: boolean
+  }
+  const p = profile as ProfileRow | null
+  const plan = p?.plan ?? 'free'
+  const fullName = p?.full_name ?? ''
   const isPro = plan === 'pro' || plan === 'school'
 
   // Fetch active subscription details for Pro users
@@ -137,7 +146,14 @@ export default async function PerfilPage({ searchParams }: Props) {
           )}
         </div>
 
-        <ProfileForm email={user.email!} initialName={fullName} />
+        <ProfileForm
+          email={user.email!}
+          initialName={fullName}
+          initialPhone={p?.phone ?? null}
+          initialTargetScore={p?.target_score ?? null}
+          initialSchoolStage={p?.school_stage ?? null}
+          initialMarketingConsent={p?.marketing_consent ?? false}
+        />
 
       </div>
     </main>

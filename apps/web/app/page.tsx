@@ -53,7 +53,7 @@ export default async function Home() {
   }
 
   const [profileResult, walletResult, essaysResult, subscriptionResult] = await Promise.all([
-    supabase.from('profiles').select('full_name, plan').eq('id', user.id).single(),
+    supabase.from('profiles').select('full_name, plan, target_score').eq('id', user.id).single(),
     supabase
       .from('credit_wallets')
       .select('credits_available')
@@ -76,9 +76,11 @@ export default async function Home() {
       .maybeSingle(),
   ])
 
-  type ProfileRow = { full_name?: string; plan?: string }
-  const fullName = (profileResult.data as ProfileRow | null)?.full_name ?? null
-  const plan = (profileResult.data as ProfileRow | null)?.plan ?? 'free'
+  type ProfileRow = { full_name?: string; plan?: string; target_score?: number | null }
+  const profileRow = profileResult.data as ProfileRow | null
+  const fullName = profileRow?.full_name ?? null
+  const plan = profileRow?.plan ?? 'free'
+  const targetScore = profileRow?.target_score ?? null
   const isPro = plan === 'pro' || plan === 'school'
 
   type SubRow = { cancel_at_period_end: boolean; current_period_end: string | null }
@@ -161,11 +163,26 @@ export default async function Home() {
         </div>
 
         {/* Motivational banner */}
-        <div className="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 px-6 py-6 text-white shadow-md">
-          <p className="text-base font-semibold leading-snug">Treinar redação é o caminho para a nota 1000.</p>
-          <p className="text-sm text-blue-300 mt-1">
-            Cada redação corrigida é um passo a mais rumo ao ENEM.
-          </p>
+        <div className="rounded-2xl bg-gradient-to-br from-blue-950 via-blue-900 to-blue-800 px-6 py-6 text-white shadow-md flex items-center justify-between gap-4">
+          <div>
+            <p className="text-base font-semibold leading-snug">Treinar redação é o caminho para a nota 1000.</p>
+            <p className="text-sm text-blue-300 mt-1">
+              Cada redação corrigida é um passo a mais rumo ao ENEM.
+            </p>
+          </div>
+          {targetScore ? (
+            <div className="shrink-0 text-right">
+              <p className="text-xs text-blue-300 font-medium">Meta</p>
+              <p className="text-lg font-bold text-white tabular-nums">{targetScore}+</p>
+            </div>
+          ) : (
+            <Link
+              href="/perfil"
+              className="shrink-0 text-xs font-medium text-blue-300 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Definir meta →
+            </Link>
+          )}
         </div>
 
         {/* Action cards */}

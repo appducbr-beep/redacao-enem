@@ -11,14 +11,24 @@ export default function LoginPage() {
   const [state, action, pending] = useActionState(signIn, undefined)
 
   return (
-    <AuthShell>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <AuthShell
+      topbarAction={
+        <Link
+          href="/register"
+          className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+        >
+          Criar conta
+        </Link>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
         <AuthHero />
 
         <AuthCard
+          icon="✍️"
           title="Acesse sua conta"
-          subtitle="Entre para continuar seus treinos e acompanhar sua evolução."
+          subtitle="Continue sua jornada rumo a uma redação mais forte."
         >
           <form action={action} className="space-y-4">
             <div>
@@ -31,7 +41,8 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                placeholder="seu@email.com"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
               />
             </div>
 
@@ -53,7 +64,8 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                placeholder="••••••••"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
               />
             </div>
 
@@ -66,18 +78,20 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm mt-1"
+              className="w-full h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-1"
             >
-              {pending ? 'Entrando...' : 'Entrar'}
+              {pending ? 'Entrando...' : 'Entrar na plataforma'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Ainda não tem conta?{' '}
-            <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-              Criar conta grátis
-            </Link>
-          </p>
+          <div className="mt-5 bg-slate-50 rounded-2xl px-4 py-3.5 text-center">
+            <p className="text-sm text-slate-500">
+              Ainda não tem conta?{' '}
+              <Link href="/register" className="font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                Criar conta grátis
+              </Link>
+            </p>
+          </div>
         </AuthCard>
 
       </div>

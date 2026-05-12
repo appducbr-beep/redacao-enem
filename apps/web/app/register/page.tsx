@@ -11,14 +11,24 @@ export default function RegisterPage() {
   const [state, action, pending] = useActionState(signUp, undefined)
 
   return (
-    <AuthShell>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+    <AuthShell
+      topbarAction={
+        <Link
+          href="/login"
+          className="text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
+        >
+          Entrar
+        </Link>
+      }
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
         <AuthHero />
 
         <AuthCard
+          icon="✍️"
           title="Crie sua conta grátis"
-          subtitle="Comece com créditos gratuitos para testar a plataforma."
+          subtitle="Comece com créditos gratuitos e veja como sua redação pode evoluir."
         >
           <form action={action} className="space-y-4">
             <div>
@@ -31,7 +41,8 @@ export default function RegisterPage() {
                 type="text"
                 autoComplete="name"
                 required
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                placeholder="Seu nome"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
               />
             </div>
 
@@ -45,7 +56,8 @@ export default function RegisterPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                placeholder="seu@email.com"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
               />
             </div>
 
@@ -60,9 +72,9 @@ export default function RegisterPage() {
                 autoComplete="new-password"
                 required
                 minLength={6}
-                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-colors"
+                placeholder="Mínimo 6 caracteres"
+                className="w-full h-12 rounded-2xl border border-slate-200 bg-slate-50 px-4 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all"
               />
-              <p className="mt-1.5 text-xs text-slate-400">Mínimo de 6 caracteres</p>
             </div>
 
             {state?.error && (
@@ -74,18 +86,20 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={pending}
-              className="w-full rounded-xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm mt-1"
+              className="w-full h-12 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all mt-1"
             >
               {pending ? 'Criando conta...' : 'Criar conta grátis'}
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Já tem conta?{' '}
-            <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-              Entrar
-            </Link>
-          </p>
+          <div className="mt-5 bg-slate-50 rounded-2xl px-4 py-3.5 text-center">
+            <p className="text-sm text-slate-500">
+              Já tem conta?{' '}
+              <Link href="/login" className="font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                Entrar
+              </Link>
+            </p>
+          </div>
         </AuthCard>
 
       </div>

@@ -1,50 +1,62 @@
-const BENEFITS = [
+const METRICS = [
   {
-    title: 'Correção completa',
-    description: 'Nota geral, competências C1–C5, justificativas e orientações de melhoria.',
+    label: 'C1–C5 avaliadas',
+    sub: 'Todas as competências do ENEM',
   },
   {
-    title: 'Histórico organizado',
-    description: 'Consulte suas redações anteriores e acompanhe seu desempenho ao longo do tempo.',
+    label: 'Histórico completo',
+    sub: 'Consulte suas redações anteriores',
   },
   {
-    title: 'Evolução real',
-    description: 'Veja sua média, pontos fortes e competências que precisam de atenção.',
+    label: 'Evolução por nota',
+    sub: 'Acompanhe sua progressão ao longo do tempo',
   },
 ]
 
 export default function AuthHero() {
   return (
-    <div className="hidden lg:flex flex-col gap-7">
+    <div className="hidden lg:flex flex-col gap-6">
 
       {/* Badge + copy */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         <span className="inline-flex items-center rounded-full bg-blue-50 border border-blue-100 px-3 py-1.5 text-xs font-semibold text-blue-700">
-          Preparação ENEM · Plataforma do aluno
+          Preparação ENEM • Feedback por competência
         </span>
         <h2 className="text-3xl font-bold text-slate-900 leading-tight">
-          Entre, escreva e acompanhe sua evolução.
+          Treine redação com clareza, método e evolução real.
         </h2>
-        <p className="text-slate-500 leading-relaxed">
-          Continue seus treinos, revise suas correções anteriores e avance rumo a uma redação cada vez mais forte no modelo ENEM.
+        <p className="text-sm text-slate-500 leading-relaxed">
+          Receba diagnósticos objetivos, entenda onde perde pontos e acompanhe sua evolução em cada competência do ENEM.
         </p>
       </div>
 
-      {/* Blue panel */}
-      <div className="rounded-2xl bg-gradient-to-br from-blue-700 to-blue-600 p-6 space-y-5 shadow-lg">
-        <div>
-          <p className="text-base font-semibold text-white leading-snug">
-            Seu próximo passo começa aqui.
-          </p>
-          <p className="text-sm text-blue-200 mt-1.5 leading-relaxed">
-            Envie sua redação, receba uma análise detalhada por competência e acompanhe sua evolução ao longo dos treinos.
-          </p>
+      {/* Premium dark panel */}
+      <div className="rounded-3xl bg-gradient-to-br from-blue-800 to-blue-950 p-7 space-y-5 shadow-2xl">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-2xl shrink-0">
+            ✍️
+          </div>
+          <div>
+            <p className="text-base font-bold text-white leading-snug">
+              Seu próximo treino começa aqui
+            </p>
+            <p className="text-sm text-blue-200 mt-1 leading-relaxed">
+              Envie sua redação e receba uma análise detalhada por competência.
+            </p>
+          </div>
         </div>
-        <div className="space-y-3">
-          {BENEFITS.map((b) => (
-            <div key={b.title} className="rounded-xl bg-white/15 px-4 py-3.5 space-y-0.5">
-              <p className="text-sm font-semibold text-white">{b.title}</p>
-              <p className="text-xs text-blue-200 leading-relaxed">{b.description}</p>
+
+        <div className="space-y-2.5">
+          {METRICS.map((m) => (
+            <div
+              key={m.label}
+              className="flex items-center gap-3 rounded-2xl bg-white/10 border border-white/15 px-4 py-3"
+            >
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-300 shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-white leading-none">{m.label}</p>
+                <p className="text-xs text-blue-200 mt-0.5 leading-relaxed">{m.sub}</p>
+              </div>
             </div>
           ))}
         </div>

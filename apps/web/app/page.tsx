@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabaseServer'
 import LogoutButton from '@/components/LogoutButton'
@@ -5,6 +6,13 @@ import DashboardActionCard from '@/components/dashboard/DashboardActionCard'
 import DashboardStatsCard from '@/components/dashboard/DashboardStatsCard'
 import RecentEssaysTable from '@/components/dashboard/RecentEssaysTable'
 import type { RecentEssayRow } from '@/components/dashboard/RecentEssaysTable'
+import LandingPage from '@/components/landing/LandingPage'
+
+export const metadata: Metadata = {
+  title: 'Reda1000 — Treine redação para o ENEM com feedback detalhado',
+  description:
+    'Plataforma de treino de redação ENEM com análises detalhadas por competência (C1–C5), evolução por nota e acompanhamento completo. Comece grátis.',
+}
 
 export default async function Home() {
   const supabase = await createClient()
@@ -13,43 +21,7 @@ export default async function Home() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return (
-      <main className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
-        <div className="w-full max-w-md space-y-8 text-center">
-          <div className="space-y-4">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 shadow-lg mb-2">
-              <span className="text-2xl font-bold text-white">R</span>
-            </div>
-            <h1 className="text-5xl font-bold tracking-tight text-slate-900">
-              Reda<span className="text-blue-600">1000</span>
-            </h1>
-            <p className="text-lg font-semibold text-slate-700">
-              Treine redação para o ENEM com feedback de IA
-            </p>
-            <p className="text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
-              Receba nota por competência (C1–C5), veja onde você perde pontos e acompanhe sua evolução.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/register"
-              className="block w-full rounded-2xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white hover:bg-blue-700 transition-colors shadow-sm"
-            >
-              Criar conta grátis
-            </Link>
-            <Link
-              href="/login"
-              className="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
-            >
-              Já tenho conta — entrar
-            </Link>
-          </div>
-          <p className="text-xs text-slate-400">
-            Sem cartão de crédito. Comece grátis.
-          </p>
-        </div>
-      </main>
-    )
+    return <LandingPage />
   }
 
   const [profileResult, walletResult, essaysResult, subscriptionResult] = await Promise.all([

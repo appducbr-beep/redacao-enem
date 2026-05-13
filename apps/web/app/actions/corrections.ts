@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabaseServer'
 import { correctEssayWithGroq } from '@/lib/groq'
+import { logError } from '@/lib/logger'
+import { generateErrorId } from '@/lib/errorId'
 
 type CorrectionState = { error: string | null }
 
@@ -29,13 +31,14 @@ export async function runEssayCorrection(essayId: string): Promise<CorrectionSta
     revalidatePath(`/redacoes/${essayId}`)
     return { error: null }
   } catch (err) {
-    // Erro já foi registrado em correctEssayWithGroq; crédito já foi reembolsado.
+    const errorId = generateErrorId()
+    logError('correction failed', { essay_id: essayId, error_id: errorId })
     revalidatePath(`/redacoes/${essayId}`)
     return {
       error:
         err instanceof Error && err.message.includes('OPENAI_API_KEY')
           ? 'Serviço de correção não configurado. Contate o suporte.'
-          : 'Erro ao corrigir redação. Seu crédito foi devolvido.',
+          : `A correção não pôde ser concluída agora. Tente novamente em alguns minutos. Seu crédito foi devolvido. (Ref: ${errorId})`,
     }
   }
 }

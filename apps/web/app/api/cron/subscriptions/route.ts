@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { validateCronRequest } from '@/lib/cronAuth'
 import { trackServerEvent } from '@/lib/analytics'
+import { logInfo, logError } from '@/lib/logger'
 
 // Accepts two auth methods:
 //   Vercel Cron:  Authorization: Bearer <CRON_SECRET>
@@ -11,13 +12,15 @@ export async function GET(request: NextRequest) {
 
   if (!auth.ok) {
     if (auth.status === 500) {
-      console.error('[cron/subscriptions] CRON_SECRET not configured')
+      logError('cron secret not configured')
       return NextResponse.json({ error: auth.error }, { status: 500 })
     }
-    console.warn('[cron/subscriptions] unauthorized request')
+    logError('cron unauthorized request')
     return NextResponse.json({ error: auth.error }, { status: 401 })
   }
 
+  const start = Date.now()
+  logInfo('cron subscriptions started')
   const results: Record<string, number | string> = {}
 
   // 1. Monthly credit resets for annual subscriptions
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
     if (error) throw error
     results.credit_resets = (data as number) ?? 0
   } catch (err) {
-    console.error('[cron/subscriptions] credit_resets error:', err)
+    logError('cron credit_resets failed', { error: String(err) })
     results.credit_resets_error = String(err)
   }
 
@@ -38,11 +41,12 @@ export async function GET(request: NextRequest) {
     if (error) throw error
     results.expirations = (data as number) ?? 0
   } catch (err) {
-    console.error('[cron/subscriptions] expirations error:', err)
+    logError('cron expirations failed', { error: String(err) })
     results.expirations_error = String(err)
   }
 
-  console.log('[cron/subscriptions]', results)
+  const ms = Date.now() - start
+  logInfo('cron subscriptions finished', { ...results, ms })
   trackServerEvent('cron_subscriptions_processed', undefined, results)
   return NextResponse.json({ ok: true, ...results })
 }

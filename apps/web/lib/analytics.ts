@@ -32,13 +32,17 @@ export async function trackEvent(
   properties?: Record<string, unknown>
 ): Promise<void> {
   if (!isAllowedAnalyticsEvent(eventName)) return
-  try {
-    await fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event: eventName, properties }),
-    })
-  } catch {
-    // best-effort — never throw
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch('/api/analytics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: eventName, properties }),
+      })
+      if (res.ok) return
+      if (res.status < 500) return // client error — don't retry
+    } catch {
+      // network error — retry once
+    }
   }
 }

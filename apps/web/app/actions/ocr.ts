@@ -39,6 +39,9 @@ export async function extractEssayTextFromImage(formData: FormData): Promise<Ocr
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[OCR] falhou:', msg)
     trackServerEvent('ocr_failed', user.id, { error: msg })
-    return { error: 'Falha ao extrair texto da imagem. Tente novamente.' }
+    return {
+      error:
+        'Não foi possível extrair o texto automaticamente. Você ainda pode digitar ou colar sua redação manualmente.',
+    }
   }
 }

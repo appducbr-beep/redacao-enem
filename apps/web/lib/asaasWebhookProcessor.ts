@@ -1,4 +1,5 @@
 import { trackServerEvent } from './analytics'
+import { logInfo, logError } from './logger'
 
 const PRO_CREDITS_PER_CYCLE = 20
 
@@ -76,9 +77,12 @@ export async function processWebhookEvent(
     } else if (event === 'SUBSCRIPTION_CANCELLED' || event === 'SUBSCRIPTION_DELETED') {
       const subId = body.subscription?.id ?? body.payment?.subscription
       if (subId) await processSubscriptionCancelled(subId, deps)
+    } else {
+      logInfo('webhook event unhandled', { event })
     }
   } catch (err) {
     processingError = String(err)
+    logError('webhook event processing error', { event, event_id: eventId, error: processingError })
   }
 
   if (logId) {

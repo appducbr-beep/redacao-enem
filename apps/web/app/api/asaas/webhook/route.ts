@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { processWebhookEvent, type WebhookProcessorDeps } from '@/lib/asaasWebhookProcessor'
+import { logInfo, logWarn, logError } from '@/lib/logger'
 
 function createDeps(): WebhookProcessorDeps {
   return {
@@ -70,10 +71,8 @@ export async function POST(request: NextRequest) {
   const receivedToken = request.headers.get('asaas-access-token')
   const expectedToken = process.env.ASAAS_WEBHOOK_TOKEN
 
-  console.log('[webhook/asaas] token received:', Boolean(receivedToken))
-
   if (!expectedToken || receivedToken !== expectedToken) {
-    console.warn('[webhook/asaas] Unauthorized request — invalid token')
+    logWarn('webhook unauthorized', { token_present: Boolean(receivedToken) })
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -81,19 +80,23 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json()
   } catch {
+    logWarn('webhook invalid json')
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
   const eventId = body?.id ?? body?.payment?.id ?? null
-  console.log('[webhook/asaas] event:', body?.event, 'id:', eventId)
+  logInfo('webhook received', { event: body?.event, event_id: eventId })
 
+  const start = Date.now()
   const result = await processWebhookEvent(body, createDeps())
+  const ms = Date.now() - start
 
   if (result.duplicate) {
-    console.log('[webhook/asaas] Duplicate event, skipping:', eventId)
-  }
-  if (result.error) {
-    console.error('[webhook/asaas] Handler error:', result.error)
+    logInfo('webhook duplicate skipped', { event: body?.event, event_id: eventId })
+  } else if (result.error) {
+    logError('webhook handler error', { event: body?.event, event_id: eventId, error: result.error, ms })
+  } else {
+    logInfo('webhook processed', { event: body?.event, event_id: eventId, ms })
   }
 
   // Always return 200 so Asaas doesn't retry — errors logged for manual review

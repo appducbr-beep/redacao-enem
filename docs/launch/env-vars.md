@@ -11,7 +11,7 @@ Referência completa para configurar `apps/web/.env.local` (dev) e Vercel Enviro
 | `NEXT_PUBLIC_SUPABASE_URL` | Sim | Não | Sim | todos | URL pública do projeto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Sim | Não | Sim | todos | Chave anônima do Supabase (segura para client) |
 | `SUPABASE_SERVICE_ROLE_KEY` | Sim | **Sim** | **Nunca** | server-only | Bypassa RLS — apenas Server Actions e API Routes |
-| `NEXT_PUBLIC_APP_URL` | Sim | Não | Sim | todos | URL base da aplicação (ex: `https://reda1000.com.br`) |
+| `NEXT_PUBLIC_APP_URL` | Sim | Não | Sim | todos | URL base da aplicação. Dev: `http://localhost:3000`. Produção: `https://reda1000.app.br` |
 | `OPENAI_API_KEY` | Sim | **Sim** | **Nunca** | server-only | Correção de redações por IA |
 | `OPENAI_MODEL` | Não | Não | Não | server-only | Modelo OpenAI. Padrão: `gpt-4o` |
 | `GROQ_API_KEY` | Sim | **Sim** | **Nunca** | server-only | OCR de redações manuscritas (Llama Vision) |
@@ -99,7 +99,7 @@ Referência completa para configurar `apps/web/.env.local` (dev) e Vercel Enviro
 | `ASAAS_ENV` | `sandbox` | `sandbox` | `production` |
 | `ASAAS_API_KEY` | chave sandbox | chave sandbox | chave produção |
 | `ASAAS_BASE_URL` | sandbox URL | sandbox URL | produção URL |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | URL do preview | URL de produção |
+| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | `https://redacao-enem-green.vercel.app` | `https://reda1000.app.br` |
 | Demais | `.env.local` | Vercel vars | Vercel vars |
 
 ---

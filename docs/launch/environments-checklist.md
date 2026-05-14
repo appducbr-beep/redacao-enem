@@ -107,12 +107,13 @@ NEXT_PUBLIC_APP_URL=https://reda1000.app.br
 
 | Item | Valor esperado |
 |---|---|
-| Site URL (sandbox) | `https://redacao-enem-green.vercel.app` |
+| Site URL (preview/sandbox) | `https://redacao-enem-green.vercel.app` |
 | Site URL (produção) | `https://reda1000.app.br` |
 | Redirect URLs | `http://localhost:3000/auth/callback` |
 | | `https://redacao-enem-green.vercel.app/auth/callback` |
 | | `https://*.vercel.app/auth/callback` |
 | | `https://reda1000.app.br/auth/callback` (adicionar antes do go-live) |
+| | `https://www.reda1000.app.br/auth/callback` (adicionar antes do go-live) |
 
 **Status atual:** ⚠️ Verificar se redirect URLs incluem o domínio do preview.
 

@@ -171,10 +171,28 @@ SELECT plan FROM profiles WHERE id = 'USER_ID';
 
 ---
 
+## Produção
+
+URL de produção do cron:
+```
+https://reda1000.app.br/api/cron/subscriptions
+```
+
+O Vercel Cron já usa a URL do projeto automaticamente via `vercel.json` — nenhuma alteração necessária no arquivo quando o domínio próprio for ativado. O agendamento continua funcionando.
+
+Para chamada manual em produção:
+```bash
+curl -X GET https://reda1000.app.br/api/cron/subscriptions \
+  -H "x-cron-secret: <CRON_SECRET>"
+```
+
+---
+
 ## Logs esperados
 
-```
-[cron/subscriptions] { credit_resets: 0, expirations: 1 }
+```json
+[reda1000] {"level":"info","message":"cron subscriptions started","timestamp":"..."}
+[reda1000] {"level":"info","message":"cron subscriptions finished","context":{"credit_resets":0,"expirations":1,"ms":234},"timestamp":"..."}
 ```
 
 Acessar em: Vercel Dashboard → Project → Logs (filtrar por `/api/cron/subscriptions`).

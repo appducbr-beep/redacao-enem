@@ -25,6 +25,7 @@ Cobranças reais: **Não**
 ASAAS_ENV=production
 ASAAS_BASE_URL=https://api.asaas.com/v3
 ASAAS_API_KEY=<chave de produção, gerada no painel prod>
+ASAAS_WEBHOOK_TOKEN=<novo token, openssl rand -hex 32>
 ```
 
 Dashboard: `https://www.asaas.com`
@@ -34,7 +35,10 @@ Webhook URL:
 https://reda1000.app.br/api/asaas/webhook
 ```
 
-Cobranças reais: **Sim** — configurar apenas após testes completos no sandbox.
+Cobranças reais: **Sim** — configurar apenas após:
+1. Domínio `reda1000.app.br` ativo e com SSL (ver `docs/launch/domain-setup.md`)
+2. Testes completos no sandbox
+3. `ASAAS_ENV=production` configurado **somente** no ambiente Production da Vercel
 
 ---
 

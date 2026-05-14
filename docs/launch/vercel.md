@@ -114,14 +114,30 @@ O arquivo `apps/web/vercel.json` define o cron diário:
 
 ---
 
+## Configurar domínio próprio
+
+1. **Settings → Domains → Add Domain**
+2. Adicionar `reda1000.app.br` (domínio principal)
+3. Adicionar `www.reda1000.app.br` (configurar como redirect para apex)
+4. Anotar os registros DNS exibidos pela Vercel
+5. Configurar no Registro.br:
+   - `A` `@` → `76.76.21.21`
+   - `CNAME` `www` → `cname.vercel-dns.com`
+6. Aguardar propagação (5–30 min) e verificar status ✅ na Vercel
+
+> Guia completo: `docs/launch/domain-setup.md`
+
+---
+
 ## Checklist de deploy para produção
 
 - [ ] Root Directory = `apps/web` confirmado
 - [ ] Todas as variáveis configuradas em **Production**
+- [ ] `NEXT_PUBLIC_APP_URL=https://reda1000.app.br` em Production
 - [ ] `ASAAS_ENV=production` em Production
 - [ ] `ASAAS_BASE_URL=https://api.asaas.com/v3` em Production
-- [ ] `NEXT_PUBLIC_APP_URL` = domínio real em Production
-- [ ] Supabase Auth URL atualizada para domínio de produção
-- [ ] Webhook Asaas configurado com URL de produção
+- [ ] Domínio `reda1000.app.br` configurado e com status ✅ (ver `docs/launch/domain-setup.md`)
+- [ ] Supabase Auth URLs atualizadas para domínio de produção (ver `docs/launch/supabase-auth.md`)
+- [ ] Webhook Asaas configurado com URL de produção (ver `docs/launch/asaas.md`)
 - [ ] `npm run qa` passando localmente antes do deploy
 - [ ] Redeploy feito após configurar variáveis

@@ -3,9 +3,10 @@ import Link from 'next/link'
 interface Props {
   children: React.ReactNode
   topbarAction?: React.ReactNode
+  compact?: boolean
 }
 
-export default function AuthShell({ children, topbarAction }: Props) {
+export default function AuthShell({ children, topbarAction, compact = false }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/40 to-white relative overflow-hidden">
       {/* Decorative blur shapes */}
@@ -33,8 +34,8 @@ export default function AuthShell({ children, topbarAction }: Props) {
       </header>
 
       {/* Content */}
-      <main className="relative z-10 max-w-6xl mx-auto px-4 min-h-[calc(100vh-68px)] flex items-center">
-        <div className="w-full py-10 lg:py-14">
+      <main className={`relative z-10 max-w-6xl mx-auto px-4 min-h-[calc(100vh-68px)] flex ${compact ? 'items-start' : 'items-center'}`}>
+        <div className={`w-full ${compact ? 'py-6 lg:py-8' : 'py-10 lg:py-14'}`}>
           {children}
         </div>
       </main>

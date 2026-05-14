@@ -39,6 +39,7 @@ export default function RegisterPage() {
 
   return (
     <AuthShell
+      compact
       topbarAction={
         <Link
           href="/login"
@@ -48,9 +49,9 @@ export default function RegisterPage() {
         </Link>
       }
     >
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
 
-        <AuthHero />
+        <AuthHero compact />
 
         <AuthCard
           icon="✍️"

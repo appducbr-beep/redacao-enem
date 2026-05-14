@@ -13,9 +13,9 @@ const METRICS = [
   },
 ]
 
-export default function AuthHero() {
+export default function AuthHero({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="hidden lg:flex flex-col gap-6">
+    <div className={`hidden lg:flex flex-col ${compact ? 'gap-4' : 'gap-6'}`}>
 
       {/* Badge + copy */}
       <div className="space-y-3">
@@ -31,7 +31,7 @@ export default function AuthHero() {
       </div>
 
       {/* Premium dark panel */}
-      <div className="rounded-3xl bg-gradient-to-br from-blue-800 to-blue-950 p-7 space-y-5 shadow-2xl">
+      <div className={`rounded-3xl bg-gradient-to-br from-blue-800 to-blue-950 shadow-2xl ${compact ? 'p-5 space-y-3' : 'p-7 space-y-5'}`}>
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center text-2xl shrink-0">
             ✍️

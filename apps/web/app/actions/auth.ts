@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { sanitizePhone } from '@/lib/phoneUtils'
 import { trackServerEvent } from '@/lib/analytics'
+import { translateAuthError } from '@/lib/authMessages'
 import { sendWelcomeEmail } from '@/lib/brevo'
 
 type AuthState = { error: string | null; success?: string }
@@ -20,7 +21,7 @@ export async function signIn(
     password: formData.get('password') as string,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error.message) }
 
   trackServerEvent('login_completed', data.user?.id)
   redirect('/')
@@ -37,7 +38,7 @@ export async function signUp(
     password: formData.get('password') as string,
   })
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error.message) }
 
   if (data.user) {
     const fullName = (formData.get('full_name') as string)?.trim() || null
@@ -61,7 +62,7 @@ export async function signUp(
     sendWelcomeEmail(data.user.email!, fullName).catch(() => {})
   }
 
-  redirect('/')
+  redirect('/login?signup=success')
 }
 
 export async function forgotPassword(
@@ -73,12 +74,25 @@ export async function forgotPassword(
 
   const { error } = await supabase.auth.resetPasswordForEmail(
     formData.get('email') as string,
-    { redirectTo: `${appUrl}/auth/callback?next=/update-password` }
+    { redirectTo: `${appUrl}/auth/callback?next=/reset-password` }
   )
 
-  if (error) return { error: error.message }
+  if (error) return { error: translateAuthError(error.message) }
 
   return { error: null, success: 'Verifique seu e-mail para redefinir a senha.' }
+}
+
+export async function updatePassword(
+  _prev: AuthState | undefined,
+  formData: FormData
+): Promise<AuthState> {
+  const supabase = await createClient()
+  const password = formData.get('password') as string
+
+  const { error } = await supabase.auth.updateUser({ password })
+  if (error) return { error: translateAuthError(error.message) }
+
+  redirect('/login?reset=success')
 }
 
 export async function signOut(): Promise<void> {

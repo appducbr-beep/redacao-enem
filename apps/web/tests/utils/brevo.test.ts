@@ -149,6 +149,18 @@ describe('sendWelcomeEmail', () => {
     delete process.env.BREVO_API_KEY
     await expect(sendWelcomeEmail('user@test.com', 'João')).resolves.toBeUndefined()
   })
+
+  it('CTA links to /login (not root)', async () => {
+    await sendWelcomeEmail('user@test.com', 'João')
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.htmlContent).toContain('href="https://reda1000.app.br/login"')
+  })
+
+  it('includes email confirmation note', async () => {
+    await sendWelcomeEmail('user@test.com', 'João')
+    const body = JSON.parse(mockFetch.mock.calls[0][1].body)
+    expect(body.htmlContent).toContain('confirme seu e-mail')
+  })
 })
 
 describe('sendSubscriptionConfirmedEmail', () => {

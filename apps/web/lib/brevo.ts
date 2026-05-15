@@ -51,10 +51,10 @@ export async function sendWelcomeEmail(email: string, name: string | null): Prom
     <p style="margin:0 0 20px;font-size:15px;color:#475569;line-height:1.6;">
       Sua conta foi criada com sucesso. Você tem créditos gratuitos para começar a praticar agora mesmo.
     </p>
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
       <tr>
         <td style="background:#eff6ff;border-left:4px solid #2563eb;border-radius:0 8px 8px 0;padding:16px 20px;">
-          <p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#1d4ed8;">O que você pode fazer agora:</p>
+          <p style="margin:0 0 10px;font-size:14px;font-weight:bold;color:#1d4ed8;">O que você poderá fazer:</p>
           <table cellpadding="0" cellspacing="0" border="0">
             <tr><td style="padding:3px 0;font-size:14px;color:#334155;">✅&nbsp; Enviar sua redação para análise por competência</td></tr>
             <tr><td style="padding:3px 0;font-size:14px;color:#334155;">✅&nbsp; Ver feedback detalhado nas 5 competências do ENEM</td></tr>
@@ -63,11 +63,20 @@ export async function sendWelcomeEmail(email: string, name: string | null): Prom
         </td>
       </tr>
     </table>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+      <tr>
+        <td style="background:#fefce8;border-left:4px solid #eab308;border-radius:0 8px 8px 0;padding:12px 16px;">
+          <p style="margin:0;font-size:13px;color:#713f12;line-height:1.5;">
+            Antes de entrar, confirme seu e-mail clicando no link que enviamos em uma mensagem separada.
+          </p>
+        </td>
+      </tr>
+    </table>
     <table width="100%" cellpadding="0" cellspacing="0" border="0">
       <tr>
         <td align="center">
-          <a href="${APP_URL}" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;padding:13px 32px;border-radius:100px;">
-            Começar a treinar
+          <a href="${APP_URL}/login" style="display:inline-block;background:#2563eb;color:#ffffff;font-size:15px;font-weight:bold;text-decoration:none;padding:13px 32px;border-radius:100px;">
+            Entrar na plataforma
           </a>
         </td>
       </tr>

@@ -64,6 +64,20 @@ function createDeps(): WebhookProcessorDeps {
       })
       if (error) throw new Error(`set_credit_balance: ${error.message}`)
     },
+
+    findUserById: async (userId) => {
+      const { data: authData } = await supabaseAdmin.auth.admin.getUserById(userId)
+      if (!authData?.user?.email) return null
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('full_name')
+        .eq('id', userId)
+        .maybeSingle()
+      return {
+        email: authData.user.email,
+        name: (profile as { full_name?: string } | null)?.full_name ?? null,
+      }
+    },
   }
 }
 

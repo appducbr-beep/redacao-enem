@@ -87,6 +87,23 @@
 
 ---
 
+## Brevo (e-mails transacionais)
+
+| Item | Status | Notas |
+|---|---|---|
+| Conta Brevo criada | ⚠️ | app.brevo.com |
+| `BREVO_API_KEY` configurada no Vercel (Production) | ⚠️ | Nunca expor com `NEXT_PUBLIC_` |
+| `BREVO_SENDER_EMAIL=no-reply@reda1000.app.br` configurada | ⚠️ | Domínio precisa de verificação no Brevo |
+| `BREVO_SENDER_NAME=Reda1000` configurada | ⚠️ | — |
+| DNS SPF/DKIM configurados para reda1000.app.br no Brevo | ⚠️ | Brevo → Senders & Domains → Autenticação |
+| E-mail de boas-vindas testado (signup) | ⚠️ | Disparado em `app/actions/auth.ts` |
+| E-mail de assinatura confirmada testado (webhook) | ⚠️ | Disparado via `lib/asaasWebhookProcessor.ts` |
+| E-mail de cancelamento imediato testado | ⚠️ | Disparado em `app/actions/billing.ts` |
+| E-mail de cancelamento agendado testado | ⚠️ | Disparado em `app/actions/billing.ts` |
+| Sem `BREVO_API_KEY` → sistema funciona (sem throw) | ✅ | Testado em `tests/utils/brevo.test.ts` |
+
+---
+
 ## Testes
 
 | Item | Status | Notas |
@@ -145,6 +162,9 @@
    - `ASAAS_BASE_URL=https://api.asaas.com/v3`
    - `ASAAS_WEBHOOK_TOKEN` (novo token para produção)
    - `CRON_SECRET`
+   - `BREVO_API_KEY` (chave Brevo — **NUNCA com NEXT_PUBLIC_**)
+   - `BREVO_SENDER_EMAIL=no-reply@reda1000.app.br`
+   - `BREVO_SENDER_NAME=Reda1000`
    - Todas as demais vars
 
 3. **Configurar webhook no Asaas (produção):**

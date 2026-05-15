@@ -21,6 +21,9 @@ Referência completa para configurar `apps/web/.env.local` (dev) e Vercel Enviro
 | `ASAAS_BASE_URL` | Sim | Não | Não | server-only | `https://sandbox.asaas.com/api/v3` ou `https://api.asaas.com/v3` |
 | `ASAAS_WEBHOOK_TOKEN` | Sim | **Sim** | **Nunca** | server-only | Token para validar chamadas do webhook Asaas |
 | `CRON_SECRET` | Sim | **Sim** | **Nunca** | server-only | Token para autenticar `/api/cron/subscriptions` |
+| `BREVO_API_KEY` | Sim | **Sim** | **Nunca** | server-only | Chave de API do Brevo para e-mails transacionais |
+| `BREVO_SENDER_EMAIL` | Não | Não | Não | server-only | Endereço remetente. Padrão: `no-reply@reda1000.app.br` |
+| `BREVO_SENDER_NAME` | Não | Não | Não | server-only | Nome remetente. Padrão: `Reda1000` |
 
 ---
 
@@ -82,6 +85,21 @@ Referência completa para configurar `apps/web/.env.local` (dev) e Vercel Enviro
 - Gerar: `openssl rand -hex 32`
 - Configurar no Asaas Dashboard ao criar o webhook
 - Asaas envia no header `asaas-access-token` de cada evento
+
+### Brevo (e-mails transacionais)
+
+**`BREVO_API_KEY`**
+- Gerar em: app.brevo.com → SMTP & API → API Keys
+- Usar em: `lib/brevo.ts` apenas (server-side)
+- **Nunca usar em Client Components ou expor com `NEXT_PUBLIC_`**
+- Risco: chave exposta permite envio de e-mail em seu nome
+
+**`BREVO_SENDER_EMAIL`**
+- Default: `no-reply@reda1000.app.br`
+- Deve ser um domínio verificado no Brevo (adicionar DNS SPF/DKIM)
+
+**`BREVO_SENDER_NAME`**
+- Default: `Reda1000`
 
 ### Cron
 

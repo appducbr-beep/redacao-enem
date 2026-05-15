@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { sanitizePhone } from '@/lib/phoneUtils'
 import { trackServerEvent } from '@/lib/analytics'
+import { sendWelcomeEmail } from '@/lib/brevo'
 
 type AuthState = { error: string | null; success?: string }
 
@@ -57,6 +58,7 @@ export async function signUp(
 
     await supabaseAdmin.from('profiles').update(updates).eq('id', data.user.id)
     trackServerEvent('signup_completed', data.user.id, { plan: 'free' })
+    sendWelcomeEmail(data.user.email!, fullName).catch(() => {})
   }
 
   redirect('/')

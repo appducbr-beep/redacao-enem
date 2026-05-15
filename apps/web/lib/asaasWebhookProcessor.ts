@@ -1,5 +1,9 @@
 import { trackServerEvent } from './analytics'
 import { logInfo, logError } from './logger'
+import {
+  sendSubscriptionConfirmedEmail,
+  sendSubscriptionCancelledEmail,
+} from './brevo'
 
 const PRO_CREDITS_PER_CYCLE = 20
 
@@ -51,6 +55,7 @@ export type WebhookProcessorDeps = {
   updateProfile(userId: string, plan: string): Promise<void>
   upsertPayment(data: Record<string, unknown>): Promise<void>
   setCreditBalance(userId: string, available: number, reason: string): Promise<void>
+  findUserById?(userId: string): Promise<{ email: string; name: string | null } | null>
 }
 
 export type WebhookResult = {
@@ -138,6 +143,12 @@ export async function processPaymentConfirmed(
   await deps.updateProfile(sub.user_id, 'pro')
   trackServerEvent('subscription_confirmed', sub.user_id, { billing_cycle: billingCycle })
 
+  if (deps.findUserById) {
+    deps.findUserById(sub.user_id).then((u) => {
+      if (u) sendSubscriptionConfirmedEmail(u.email, u.name, billingCycle).catch(() => {})
+    }).catch(() => {})
+  }
+
   const creditReason =
     CREDIT_REASON_BY_BILLING_CYCLE[billingCycle] ?? CREDIT_REASON_BY_BILLING_CYCLE.monthly
   await deps.setCreditBalance(sub.user_id, PRO_CREDITS_PER_CYCLE, creditReason)
@@ -157,4 +168,10 @@ export async function processSubscriptionCancelled(
 
   await deps.updateProfile(sub.user_id, 'free')
   trackServerEvent('subscription_cancelled', sub.user_id, { source: 'webhook' })
+
+  if (deps.findUserById) {
+    deps.findUserById(sub.user_id).then((u) => {
+      if (u) sendSubscriptionCancelledEmail(u.email, u.name, 'immediate').catch(() => {})
+    }).catch(() => {})
+  }
 }

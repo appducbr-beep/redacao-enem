@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabaseServer'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { cancelSubscription as cancelAsaasSubscription } from '@/lib/asaas'
 import { trackServerEvent } from '@/lib/analytics'
+import { sendSubscriptionCancelledEmail } from '@/lib/brevo'
 import {
   processUserCancellation,
   type ActiveSubForCancellation,
@@ -24,14 +25,19 @@ export async function cancelCurrentSubscription(
 
   if (!user) return { error: 'Não autenticado.' }
 
-  const { data: sub } = await supabaseAdmin
-    .from('subscriptions')
-    .select('id, asaas_subscription_id, current_period_start, current_period_end, billing_cycle')
-    .eq('user_id', user.id)
-    .eq('status', 'active')
-    .maybeSingle()
+  const [{ data: sub }, { data: profile }] = await Promise.all([
+    supabaseAdmin
+      .from('subscriptions')
+      .select('id, asaas_subscription_id, current_period_start, current_period_end, billing_cycle')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .maybeSingle(),
+    supabaseAdmin.from('profiles').select('full_name').eq('id', user.id).maybeSingle(),
+  ])
 
   if (!sub) return { error: 'Nenhuma assinatura ativa encontrada.' }
+
+  const userName: string | null = (profile as { full_name?: string } | null)?.full_name ?? null
 
   const deps: CancellationDeps = {
     now: () => new Date(),
@@ -66,9 +72,16 @@ export async function cancelCurrentSubscription(
 
   if (result.type === 'immediate') {
     trackServerEvent('subscription_cancelled', user.id, { cancellation_type: 'immediate' })
+    sendSubscriptionCancelledEmail(user.email!, userName, 'immediate').catch(() => {})
     redirect('/perfil?cancelled=immediate')
   } else {
     trackServerEvent('subscription_cancel_scheduled', user.id, { cancellation_type: 'scheduled' })
+    sendSubscriptionCancelledEmail(
+      user.email!,
+      userName,
+      'scheduled',
+      sub.current_period_end ?? undefined
+    ).catch(() => {})
     redirect('/perfil?cancelled=scheduled')
   }
 }
